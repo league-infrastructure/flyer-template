@@ -6,6 +6,16 @@ This repo is an installable Python application for creating and rendering flyer 
 - The `flyte` command is installed via a console-script entrypoint.
 - Web API available via FastAPI for remote rendering.
 
+## Workflow Overview
+
+Flyte uses a three-step process to create flyers:
+
+1. **`import`** - Analyze a template image to identify content regions and generate metadata
+2. **`compile`** - Merge content with the template to generate HTML
+3. **`render`** - Convert HTML to PNG or PDF for distribution
+
+For remote rendering, a **web service** accepts URLs and returns rendered PNG or PDF files using the same rendering engine.
+
 ## Try it locally (pip)
 
 ```zsh
