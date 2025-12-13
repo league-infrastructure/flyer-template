@@ -5,8 +5,9 @@
 # Outputs rendered images to test/output
 
 # Determine repo root from this script's location
-script_dir=${0:a:h}
-repo_root=${script_dir:h}
+# Get the directory containing this script, then go up one level
+script_dir="$(cd "$(dirname "$0")" && pwd)"
+repo_root="$(dirname "$script_dir")"
 
 content_dir="$repo_root/test/content"
 out_dir="$repo_root/test/output"

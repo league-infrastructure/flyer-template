@@ -35,10 +35,15 @@ def analyze_template(
     if img_bgr is None:
         raise ValueError(f"Failed to load image: {source_image}")
 
+    # Create directory with base name of source file
     base = source_image.stem
-    template_name = f"{base}_template.png"
-    reference_name = f"{base}_reference.png"
-    regions_name = f"{base}_regions.yaml"
+    project_dir = output_dir / base
+    project_dir.mkdir(parents=True, exist_ok=True)
+    
+    # New file names in the directory
+    src_name = "src.png"
+    reference_name = "reference.png"
+    regions_name = "regions.yaml"
 
     placeholder_bgr = hex_to_bgr(placeholder_color)
     mask = _color_mask(img_bgr, placeholder_bgr, tolerance=tolerance)
@@ -69,18 +74,17 @@ def analyze_template(
 
     name_map = _guess_region_names(regions)
 
-    output_dir.mkdir(parents=True, exist_ok=True)
-    template_path = output_dir / template_name
-    reference_path = output_dir / reference_name
-    regions_path = output_dir / regions_name
+    # Save files in the project directory
+    src_path = project_dir / src_name
+    reference_path = project_dir / reference_name
+    regions_path = project_dir / regions_name
 
-    cv2.imwrite(str(template_path), template_img)
+    # Save source image as PNG (converting if needed)
+    cv2.imwrite(str(src_path), template_img)
     cv2.imwrite(str(reference_path), reference_img)
 
+    # Build regions data without template/reference fields
     data: dict[str, Any] = {
-        "source": source_image.name,
-        "template": template_name,
-        "reference": reference_name,
         "content_color": placeholder_color.lower(),
         "css": [],
         "regions": [
@@ -101,7 +105,7 @@ def analyze_template(
         yaml.safe_dump(data, f, sort_keys=False)
 
     return {
-        "template": template_path,
+        "template": src_path,
         "reference": reference_path,
         "regions": regions_path,
         "count": len(regions),

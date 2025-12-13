@@ -1,5 +1,4 @@
-template: test/examples/SeptEvents_template.png
-regions: test/examples/SeptEvents_regions.yaml
+regions: test/examples/SeptEvents/regions.yaml
 css: test/style/style.css
 content:
   month_name: September

@@ -1,5 +1,4 @@
-template: test/examples/GeneralOsvaldoQRC_template.png
-regions: test/examples/GeneralOsvaldoQRC_regions.yaml
+regions: test/examples/GeneralOsvaldoQRC/regions.yaml
 css: test/style/style.css
 content:
   content: <h2>Welcome to the Fair</h2><p>Join us for demos, workshops, and hands-on

@@ -1,5 +1,4 @@
-template: test/examples/LicenseToCode_template.png
-regions: test/examples/LicenseToCode_regions.yaml
+regions: test/examples/LicenseToCode/regions.yaml
 css: test/style/style.css
 content:
   time: 7:00 PM

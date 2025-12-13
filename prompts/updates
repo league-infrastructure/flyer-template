@@ -1,0 +1,1 @@
+Ok, now lets change how the flyte program works, First remove the -r option for now. Instead create -c / --compile which will have two args on the command line. First the comten .yaml, and second the template + region dir ( the one that holds the template and region. ) Also add a -s / --style option to set the style sheet. The --compile fiunction will only create the .html file. 

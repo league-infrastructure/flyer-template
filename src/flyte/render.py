@@ -37,7 +37,16 @@ def render_template(
     css_dir: Path | None = None,
 ) -> Path:
     regions_data = _load_yaml(regions_file)
-    template_path = _resolve_sibling(regions_file, Path(regions_data["template"]))
+    
+    # New format: src.png in same directory, fallback to old format with "template" field
+    regions_dir = regions_file.parent
+    src_path = regions_dir / "src.png"
+    if src_path.exists():
+        template_path = src_path
+    elif "template" in regions_data:
+        template_path = _resolve_sibling(regions_file, Path(regions_data["template"]))
+    else:
+        raise ValueError(f"Could not find template image for {regions_file}")
 
     # Load raw content file to get CSS reference
     raw_content = _load_yaml(content_file)
