@@ -58,8 +58,11 @@ YAML file containing:
 source: <original_filename>
 template: <template_filename>
 reference: <reference_filename>
+content_color: <content area color ( default green) >
+css: < list of css paths>   # Filled in by user,
 regions:
   - id: <integer>           # 1-indexed region identifier
+    name: <string>          # Content area name. Default empty, filled in by user
     x: <integer>            # Left edge x-coordinate (pixels)
     y: <integer>            # Top edge y-coordinate (pixels)
     width: <integer>        # Region width (pixels)
@@ -241,19 +244,23 @@ pip install opencv-python numpy pillow pyyaml
 - Verify file exists and is a valid image format
 - Check file permissions
 
----
 
-## Extension Points
+# Content File
 
-### Multiple Placeholder Colors
-- Run the detection process for each color independently
-- Merge results, ensuring unique region IDs across colors
+A content file is a YAML or JSON file that contains a map from region names or
+numbers to HTML. The HTML can be rendered and inserted into the content areas. 
 
-### Non-Rectangular Regions
-- Current algorithm uses bounding boxes
-- For complex shapes, store full contour in addition to bbox
+Note that wne content is rendered, it is scaled so that it fits into the content
+area and floats to the top left. 
 
-### Automatic Color Detection
-- Instead of specifying placeholder color, detect dominant solid-colored rectangles
-- Use edge detection + color histogram analysis
 
+# API Interface
+
+The main program is `flyte` which has these options
+
+* `flyte -i <source filename> -o <output dir>` Import a source template. Find content areas,
+  creates reference and template images and YAML regions file
+* `flyte -r <regions> -c <content> -c <output>` Render a template from a reference to the region file and a content file 
+
+The system also exposes an API that includes a class, `Flyte` that is
+constructed on a path to a data dir, optionally a seperate path to a CSS dir

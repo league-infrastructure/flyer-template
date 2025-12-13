@@ -1,5 +1,7 @@
 """Flyte application package."""
 
-__all__ = ["__version__"]
+from flyte.flyte import Flyte
+
+__all__ = ["Flyte", "__version__"]
 
 __version__ = "0.1.0"
