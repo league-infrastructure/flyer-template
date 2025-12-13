@@ -42,6 +42,7 @@ def analyze_template(
     
     # New file names in the directory
     src_name = "src.png"
+    template_name = "template.png"
     reference_name = "reference.png"
     regions_name = "regions.yaml"
 
@@ -76,11 +77,14 @@ def analyze_template(
 
     # Save files in the project directory
     src_path = project_dir / src_name
+    template_path = project_dir / template_name
     reference_path = project_dir / reference_name
     regions_path = project_dir / regions_name
 
-    # Save source image as PNG (converting if needed)
-    cv2.imwrite(str(src_path), template_img)
+    # Copy source image as PNG (converting if needed)
+    cv2.imwrite(str(src_path), img_bgr)
+    # Save processed template with regions removed
+    cv2.imwrite(str(template_path), template_img)
     cv2.imwrite(str(reference_path), reference_img)
 
     # Build regions data without template/reference fields

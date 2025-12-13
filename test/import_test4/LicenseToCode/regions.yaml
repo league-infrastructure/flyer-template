@@ -1,0 +1,31 @@
+content_color: '#6fe600'
+css: []
+regions:
+- id: 1
+  name: time
+  x: 144
+  y: 451
+  width: 486
+  height: 93
+  background_color: '#e8e878'
+- id: 2
+  name: date
+  x: 144
+  y: 560
+  width: 486
+  height: 92
+  background_color: '#e8e878'
+- id: 3
+  name: place
+  x: 147
+  y: 671
+  width: 486
+  height: 93
+  background_color: '#e8e878'
+- id: 4
+  name: url
+  x: 516
+  y: 1237
+  width: 544
+  height: 93
+  background_color: '#000000'

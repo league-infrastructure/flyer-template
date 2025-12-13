@@ -38,11 +38,15 @@ def render_template(
 ) -> Path:
     regions_data = _load_yaml(regions_file)
     
-    # New format: src.png in same directory, fallback to old format with "template" field
+    # New format: template.png in same directory, fallback to src.png or old format with "template" field
     regions_dir = regions_file.parent
-    src_path = regions_dir / "src.png"
-    if src_path.exists():
-        template_path = src_path
+    template_path_option = regions_dir / "template.png"
+    src_path_option = regions_dir / "src.png"
+    
+    if template_path_option.exists():
+        template_path = template_path_option
+    elif src_path_option.exists():
+        template_path = src_path_option
     elif "template" in regions_data:
         template_path = _resolve_sibling(regions_file, Path(regions_data["template"]))
     else:
