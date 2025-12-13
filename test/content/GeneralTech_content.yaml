@@ -8,5 +8,5 @@ content:
   date: Dec 12, 2025
   place: Innovation Hub, 123 Main St
   content2: Highlights & Q&A
-  qr_code: Scan to RSVP
+  qr_code: https://example.com/register
   url: https://example.com/rsvp

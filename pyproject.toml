@@ -12,6 +12,7 @@ dependencies = [
 	"numpy>=2.0",
 	"opencv-python>=4.10",
 	"pillow>=10.4",
+	"pypdfium2>=5.2.0",
 	"pyyaml>=6.0",
 	"weasyprint>=62.0",
 ]
