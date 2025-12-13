@@ -207,6 +207,6 @@ marimo/_lsp/
 __marimo__/
 
 
-
-test/examples
-test/output
+test/examples/
+test/output/
+.DS_Store

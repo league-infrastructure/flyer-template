@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-from flyte.render import render_template
+from flyte.render import compile_template, render_html_to_file, render_template
 from flyte.template_analyzer import analyze_template
 
 
@@ -42,6 +42,36 @@ class Flyte:
             background_sample_offset=background_sample_offset,
             label_font_path=label_font,
         )
+
+    def compile(
+        self,
+        content_file: str | Path,
+        template_dir: str | Path,
+        output: str | Path,
+        *,
+        style: str | Path | None = None,
+    ) -> Path:
+        content_path = self._resolve(Path(content_file))
+        template_path = self._resolve(Path(template_dir))
+        output_path = self._resolve(Path(output))
+        style_path = self._resolve(Path(style)) if style else None
+        
+        return compile_template(
+            content_path,
+            template_path,
+            output_path,
+            style_path=style_path,
+        )
+
+    def render_html(
+        self,
+        html_file: str | Path,
+        output: str | Path,
+    ) -> Path:
+        html_path = self._resolve(Path(html_file))
+        output_path = self._resolve(Path(output))
+        
+        return render_html_to_file(html_path, output_path)
 
     def render(
         self,
