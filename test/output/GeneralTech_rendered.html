@@ -20,6 +20,35 @@
         width: 1080px;
         height: 1350px;
       }
+      /* Size-based font scaling for regions */
+      .region {
+        line-height: 1.2;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: flex-start;
+        padding: 8px;
+        box-sizing: border-box;
+        overflow: hidden;
+        text-align: left;
+      }
+      .region.xs { font-size: 32px; }
+      .region.sm { font-size: 52px; }
+      .region.md { font-size: 72px; }
+      .region.lg { font-size: 90px; }
+      /* Specific tuning: URL regions often need smaller base size */
+      .region.url { font-size: 36px; word-wrap: break-word; overflow-wrap: anywhere; text-align: center; }
+      .region.qr_code { display: flex; align-items: center; justify-content: center; padding: 0; }
+      .region.qr_code img { width: 90%; height: 90%; object-fit: contain; }
+      /* Prevent text overflow and force text wrapping */
+      .region h2, .region p, .region div, .region a { 
+        overflow-wrap: break-word;
+        word-wrap: break-word;
+        word-break: break-word;
+        hyphens: auto;
+        margin: 0;
+        max-width: 100%;
+      }
       /* Stylesheet for flyer content */
 
 html {
@@ -64,37 +93,37 @@ p {
   <body>
     <div id="container">
       
-    <div style="position: absolute; left: 102px; top: 310px; width: 448px; height: 432px; overflow: hidden;">
+        <div id="content" class="region md content" style="position: absolute; left: 102px; top: 310px; width: 448px; height: 432px; overflow: hidden;">
       <h2>Welcome to the Fair</h2><p>Join us for demos, workshops, and hands-on builds. Bring a friend and stay for the snacks.</p>
     </div>
     
 
-    <div style="position: absolute; left: 606px; top: 692px; width: 323px; height: 50px; overflow: hidden;">
+        <div id="time" class="region xs time" style="position: absolute; left: 606px; top: 692px; width: 323px; height: 50px; overflow: hidden;">
       7:00 PM
     </div>
     
 
-    <div style="position: absolute; left: 608px; top: 766px; width: 323px; height: 50px; overflow: hidden;">
+        <div id="date" class="region xs date" style="position: absolute; left: 608px; top: 766px; width: 323px; height: 50px; overflow: hidden;">
       Dec 12, 2025
     </div>
     
 
-    <div style="position: absolute; left: 606px; top: 840px; width: 323px; height: 50px; overflow: hidden;">
+        <div id="place" class="region xs place" style="position: absolute; left: 606px; top: 840px; width: 323px; height: 50px; overflow: hidden;">
       Innovation Hub, 123 Main St
     </div>
     
 
-    <div style="position: absolute; left: 608px; top: 914px; width: 323px; height: 50px; overflow: hidden;">
+        <div id="content2" class="region xs content2" style="position: absolute; left: 608px; top: 914px; width: 323px; height: 50px; overflow: hidden;">
       Highlights & Q&A
     </div>
     
 
-    <div style="position: absolute; left: 606px; top: 1062px; width: 191px; height: 190px; overflow: hidden;">
-      https://example.com/register
+        <div id="qr_code" class="region xs qr_code" style="position: absolute; left: 606px; top: 1062px; width: 191px; height: 190px; overflow: hidden;">
+      <img alt='QR' src='data:image/png;base64,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' style='width:100%;height:100%;object-fit:contain;' />
     </div>
     
 
-    <div style="position: absolute; left: 608px; top: 1288px; width: 340px; height: 37px; overflow: hidden;">
+        <div id="url" class="region xs url" style="position: absolute; left: 608px; top: 1288px; width: 340px; height: 37px; overflow: hidden;">
       https://example.com/rsvp
     </div>
     

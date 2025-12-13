@@ -137,17 +137,35 @@ def render_template(
         width: {template_width}px;
         height: {template_height}px;
       }}
-            /* Size-based font scaling for regions */
-            .region {{
-                line-height: 1.2;
-            }}
-            .region.xs {{ font-size: 40px; }}
-            .region.sm {{ font-size: 60px; }}
-            .region.md {{ font-size: 80px; }}
-            .region.lg {{ font-size: 100px; }}
-            /* Specific tuning: URL regions often need smaller base size */
-            .region.url {{ font-size: 48px; word-wrap: break-word; overflow-wrap: anywhere; }}
-            .region.qr_code img {{ width: 100%; height: 100%; object-fit: contain; }}
+      /* Size-based font scaling for regions */
+      .region {{
+        line-height: 1.2;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: flex-start;
+        padding: 8px;
+        box-sizing: border-box;
+        overflow: hidden;
+        text-align: left;
+      }}
+      .region.xs {{ font-size: 32px; }}
+      .region.sm {{ font-size: 52px; }}
+      .region.md {{ font-size: 72px; }}
+      .region.lg {{ font-size: 90px; }}
+      /* Specific tuning: URL regions often need smaller base size */
+      .region.url {{ font-size: 36px; word-wrap: break-word; overflow-wrap: anywhere; text-align: center; }}
+      .region.qr_code {{ display: flex; align-items: center; justify-content: center; padding: 0; }}
+      .region.qr_code img {{ width: 90%; height: 90%; object-fit: contain; }}
+      /* Prevent text overflow and force text wrapping */
+      .region h2, .region p, .region div, .region a {{ 
+        overflow-wrap: break-word;
+        word-wrap: break-word;
+        word-break: break-word;
+        hyphens: auto;
+        margin: 0;
+        max-width: 100%;
+      }}
       {css_text}
     </style>
   </head>
