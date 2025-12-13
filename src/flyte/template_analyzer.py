@@ -30,6 +30,7 @@ def analyze_template(
     edge_dilation: int = 5,
     background_sample_offset: int = 5,
     label_font_path: str | None = None,
+    replace: bool = False,
 ) -> dict[str, Any]:
     img_bgr = cv2.imread(str(source_image), cv2.IMREAD_COLOR)
     if img_bgr is None:
@@ -86,6 +87,47 @@ def analyze_template(
     # Save processed template with regions removed
     cv2.imwrite(str(template_path), template_img)
     cv2.imwrite(str(reference_path), reference_img)
+
+    # Check if regions file exists and preserve names if not replacing
+    if not replace and regions_path.exists():
+        try:
+            # Load existing regions file
+            with regions_path.open("r", encoding="utf-8") as f:
+                existing_data = yaml.safe_load(f)
+            
+            if existing_data and isinstance(existing_data, dict):
+                existing_regions = existing_data.get("regions", [])
+                
+                # Validate that regions match (same count and positions)
+                if len(existing_regions) == len(regions):
+                    # Create a map of (x, y, width, height) -> name from existing regions
+                    existing_map = {}
+                    for er in existing_regions:
+                        key = (er.get("x"), er.get("y"), er.get("width"), er.get("height"))
+                        existing_map[key] = er.get("name", "")
+                    
+                    # Check if all new regions match existing positions
+                    all_match = True
+                    for r in regions:
+                        key = (r.x, r.y, r.width, r.height)
+                        if key not in existing_map:
+                            all_match = False
+                            break
+                    
+                    if all_match:
+                        # Preserve names from existing file
+                        for r in regions:
+                            key = (r.x, r.y, r.width, r.height)
+                            if key in existing_map and existing_map[key]:
+                                name_map[r.id] = existing_map[key]
+                        
+                        print(f"Preserved region names from existing {regions_name}")
+                    else:
+                        print(f"Warning: Region positions changed, using auto-generated names")
+                else:
+                    print(f"Warning: Region count changed ({len(existing_regions)} -> {len(regions)}), using auto-generated names")
+        except Exception as e:
+            print(f"Warning: Could not load existing regions file: {e}")
 
     # Build regions data without template/reference fields
     data: dict[str, Any] = {

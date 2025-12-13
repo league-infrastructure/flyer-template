@@ -10,7 +10,7 @@ from flyte.flyte import Flyte
 def cmd_import(args: argparse.Namespace) -> None:
     """Handle the import subcommand."""
     src = Path(args.source)
-    out_dir = Path(args.output)
+    out_dir = Path(args.output) if args.output else None
     app = Flyte(data_dir=Path.cwd())
     result = app.import_template(
         src,
@@ -20,6 +20,7 @@ def cmd_import(args: argparse.Namespace) -> None:
         edge_dilation=args.dilate,
         background_sample_offset=args.offset,
         label_font=args.label_font,
+        replace=args.replace,
     )
     print(str(result["template"]))
     print(str(result["reference"]))
@@ -102,8 +103,7 @@ def main(argv: list[str] | None = None) -> None:
         "--output",
         dest="output",
         metavar="OUTPUT",
-        required=True,
-        help="Output directory",
+        help="Output directory (default: same directory as source file)",
     )
     import_parser.add_argument(
         "--color",
@@ -133,6 +133,13 @@ def main(argv: list[str] | None = None) -> None:
         dest="label_font",
         metavar="FONT_PATH",
         help="Optional TrueType/OTF font path to use for reference labels",
+    )
+    import_parser.add_argument(
+        "-r",
+        "--replace",
+        dest="replace",
+        action="store_true",
+        help="Replace existing regions.yaml (default: preserve region names if positions match)",
     )
     import_parser.set_defaults(func=cmd_import)
     

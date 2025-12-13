@@ -28,9 +28,16 @@ class Flyte:
         edge_dilation: int = 5,
         background_sample_offset: int = 5,
         label_font: str | None = None,
+        replace: bool = False,
     ) -> dict[str, Any]:
         src = self._resolve(Path(source_image))
-        out_dir = self._resolve(Path(output_dir)) if output_dir is not None else self.data_dir
+        
+        # Default output directory is the same directory as the source file
+        if output_dir is not None:
+            out_dir = self._resolve(Path(output_dir))
+        else:
+            out_dir = src.parent
+        
         out_dir.mkdir(parents=True, exist_ok=True)
 
         return analyze_template(
@@ -41,6 +48,7 @@ class Flyte:
             edge_dilation=edge_dilation,
             background_sample_offset=background_sample_offset,
             label_font_path=label_font,
+            replace=replace,
         )
 
     def compile(
