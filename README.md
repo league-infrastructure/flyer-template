@@ -1,9 +1,10 @@
 # flyer-template
 
-This repo is an installable Python application (not just a single script).
+This repo is an installable Python application for creating and rendering flyer templates.
 
 - Importable application/library code lives in `src/flyte/`.
 - The `flyte` command is installed via a console-script entrypoint.
+- Web API available via FastAPI for remote rendering.
 
 ## Try it locally (pip)
 
@@ -21,33 +22,103 @@ uv run flyte
 
 ## Commands
 
-### Import/analyze a template image
+### Import a template image
 
-Generates `{stem}_template.png`, `{stem}_reference.png`, and `{stem}_regions.yaml`.
+Generates a directory with `src.png`, `template.png`, `reference.png`, and `regions.yaml`.
 
 ```zsh
-flyte -i path/to/template.png -o out/
+flyte import path/to/template.png -o output_dir/
 ```
 
 Optional tuning:
 
 ```zsh
-flyte -i path/to/template.png -o out/ --color '#6fe600' --tolerance 20 --dilate 5 --offset 5
+flyte import path/to/template.png -o output_dir/ --color '#6fe600' --tolerance 20 --dilate 5 --offset 5
 ```
 
 Use a specific font for large reference numbers (recommended for macOS):
 
 ```zsh
-flyte -i path/to/template.png -o out/ --label-font "/Library/Fonts/Arial Bold.ttf"
+flyte import path/to/template.png -o output_dir/ --label-font "/Library/Fonts/Arial Bold.ttf"
 ```
 
-### Render content into a template
+### Compile content into HTML
 
-Renders HTML snippets from a YAML/JSON content map into the regions and composites onto the template.
+Compiles content YAML with template to generate HTML.
 
 ```zsh
-flyte -r out/template_regions.yaml -c path/to/content.yaml -o out/rendered.png
+flyte compile content.yaml template_dir/ -o output.html
 ```
+
+With custom stylesheet:
+
+```zsh
+flyte compile content.yaml template_dir/ -o output.html -s style.css
+```
+
+### Render HTML to PNG or PDF
+
+Renders HTML to PNG or PDF format.
+
+```zsh
+# Render to PNG
+flyte render page.html -o output.png
+
+# Render to PDF (with active links)
+flyte render page.html -o output.pdf
+
+# Specify format explicitly
+flyte render page.html -o output_dir/ -f pdf
+```
+
+## Web API
+
+Run the web server for remote rendering:
+
+```zsh
+./run_web_server.sh
+```
+
+Or with uvicorn directly:
+
+```zsh
+uvicorn flyte.web:app --host 0.0.0.0 --port 8000
+```
+
+### API Endpoints
+
+- `GET /` - Web interface with form and documentation
+- `GET /png?url=<URL>` - Render URL to PNG for display
+- `POST /png` - Render URL to PNG (accepts JSON or form data)
+- `GET /pdf?url=<URL>` - Render URL to PDF for download
+- `POST /pdf` - Render URL to PDF (accepts JSON or form data)
+
+Example API usage:
+
+```bash
+# GET request
+curl "http://localhost:8000/png?url=https://example.com" > output.png
+
+# POST with JSON
+curl -X POST "http://localhost:8000/pdf" \
+  -H "Content-Type: application/json" \
+  -d '{"url": "https://example.com"}' > output.pdf
+
+# POST with form data
+curl -X POST "http://localhost:8000/png" \
+  -F "url=https://example.com" > output.png
+```
+
+## Docker Deployment
+
+See `docker/README.md` for Docker setup and deployment instructions.
+
+```zsh
+cd docker
+docker-compose up -d
+```
+
+The service will be available at `http://localhost:8000` with Caddy label `webr.jtlapp.net`.
 
 HTML rendering is browser-free and uses WeasyPrint.
 

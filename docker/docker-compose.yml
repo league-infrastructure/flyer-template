@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  flyte-web:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: flyte-renderer
+    ports:
+      - "8000:8000"
+    labels:
+      caddy: webr.jtlapp.net
+    environment:
+      - PYTHONUNBUFFERED=1
+    restart: unless-stopped
+    volumes:
+      - ../src:/app/src:ro
