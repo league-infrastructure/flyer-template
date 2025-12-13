@@ -1,0 +1,8 @@
+template: test/examples/LicenseToCode_template.png
+regions: test/examples/LicenseToCode_regions.yaml
+css: test/style/style.css
+content:
+  time: 7:00 PM
+  date: Dec 12, 2025
+  place: Innovation Hub, 123 Main St
+  url: https://example.com/rsvp

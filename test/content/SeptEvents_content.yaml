@@ -1,0 +1,11 @@
+template: test/examples/SeptEvents_template.png
+regions: test/examples/SeptEvents_regions.yaml
+css: test/style/style.css
+content:
+  month_name: September
+  event_1: 'Event 1: Keynote & networking'
+  event_2: 'Event 2: Keynote & networking'
+  event_3: 'Event 3: Keynote & networking'
+  event_4: 'Event 4: Keynote & networking'
+  event_5: 'Event 5: Keynote & networking'
+  url: https://example.com/rsvp
