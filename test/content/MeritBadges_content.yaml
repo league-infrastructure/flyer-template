@@ -4,5 +4,5 @@ css: test/style/style.css
 content:
   content: <h2>Welcome to the Fair</h2><p>Join us for demos, workshops, and hands-on
     builds. Bring a friend and stay for the snacks.</p>
-  qr_code: https://example.com/register
+  qr_code: https://jointheleague.org/?utm_medium=link&utm_source=email&utm_campaign=campaign&utm_content=2025-12-13
   url: https://example.com/rsvp

@@ -20,23 +20,72 @@
         width: 1545px;
         height: 2000px;
       }
-      
+            /* Size-based font scaling for regions */
+            .region {
+                line-height: 1.2;
+            }
+            .region.xs { font-size: 40px; }
+            .region.sm { font-size: 60px; }
+            .region.md { font-size: 80px; }
+            .region.lg { font-size: 100px; }
+            /* Specific tuning: URL regions often need smaller base size */
+            .region.url { font-size: 48px; word-wrap: break-word; overflow-wrap: anywhere; }
+            .region.qr_code img { width: 100%; height: 100%; object-fit: contain; }
+      /* Stylesheet for flyer content */
+
+html {
+  background-color: rgb(232, 248, 248) !important;
+}
+
+body {
+  font-family: 'Arial', 'Helvetica', sans-serif;
+  background-color: rgb(232, 248, 248) !important;
+  color: #1a1a1a;
+  margin: 0;
+  padding: 0;
+  font-size: 80px;
+}
+
+h2 {
+  font-size: 48px;
+  font-weight: bold;
+  margin: 0 0 16px 0;
+  color: #0066cc;
+  line-height: 1.2;
+}
+
+p {
+  font-size: 30px;
+  margin: 0;
+  line-height: 1.4;
+  font-weight: 500;
+}
+
+/* Main content region styling */
+#flyte-content {
+  padding: 20px;
+  background-color: rgb(232, 248, 248) !important;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+}
+
     </style>
   </head>
   <body>
     <div id="container">
       
-    <div style="position: absolute; left: 33px; top: 1119px; width: 574px; height: 669px; background-color: #60c0d0; overflow: hidden;">
+        <div id="content" class="region lg content" style="position: absolute; left: 33px; top: 1119px; width: 574px; height: 669px; overflow: hidden;">
       <h2>Welcome to the Fair</h2><p>Join us for demos, workshops, and hands-on builds. Bring a friend and stay for the snacks.</p>
     </div>
     
 
-    <div style="position: absolute; left: 1242px; top: 1678px; width: 265px; height: 267px; background-color: #f07020; overflow: hidden;">
-      https://example.com/register
+        <div id="qr_code" class="region sm qr_code" style="position: absolute; left: 1242px; top: 1678px; width: 265px; height: 267px; overflow: hidden;">
+      <img alt='QR' src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAa4AAAGuCAYAAADI9eKaAAALG0lEQVR4nO3cQY7jNhBA0Tjo+1/ZuUAWCobpqk+9tx64JVryBwdgfb7f7/cvAIj4e/oCAOC/EC4AUoQLgBThAiBFuABIES4AUoQLgBThAiBFuABI+Xn6Dz+fz/97JVFTg0eefh9Pr+/0591yv09NrfPUe+l+/4zf0z97ruy4AEgRLgBShAuAFOECIEW4AEgRLgBShAuAFOECIEW4ALhzcsZTU5MVTjt9sv30xITt67z9frdPptg+2WP7+3HLZIrt7/lTp78POy4AUoQLgBThAiBFuABIES4AUoQLgBThAiBFuABIES4A3j0546mpk+1TJ9FPn/j3eb9jap23T9i4xS33+3nZ76kdFwApwgVAinABkCJcAKQIFwApwgVAinABkCJcAKQIFwApY5Mz2OWWk/dTk0em3DL5YYrJI012XACkCBcAKcIFQIpwAZAiXACkCBcAKcIFQIpwAZAiXACkmJwRPaF/y6SLWyZivG1dfB6T7LgASBEuAFKEC4AU4QIgRbgASBEuAFKEC4AU4QIgRbgASBmbnDE1aWDK2yY6vO372D7ZY7vT6/e26/u+7D234wIgRbgASBEuAFKEC4AU4QIgRbgASBEuAFKEC4AU4QLg3ZMz3nbi/6ntkxWmru+WSQhTz/3U97F9/bZf31N+T/+dHRcAKcIFQIpwAZAiXACkCBcAKcIFQIpwAZAiXACkCBcAKZ/v1OgCfuWk/Pav95aJE2+zfcLGLRNe+Hd2XACkCBcAKcIFQIpwAZAiXACkCBcAKcIFQIpwAZAiXACk/Dz9h9tPrG//vKdOf972yQ/b73fq+ravy2m3XN/UhI3P8ufq9N+14wIgRbgASBEuAFKEC4AU4QIgRbgASBEuAFKEC4AU4QIg5fM9fKT5bSe4b7m+p7ZPKLnl+dv+eafdMvHktFvu4/T92nEBkCJcAKQIFwApwgVAinABkCJcAKQIFwApwgVAinAB8O7JGdtPym//u1P38dQtkz1uud/Tbpk8MmX7e/5d/ntlcgYAV/JfhQCkCBcAKcIFQIpwAZAiXACkCBcAKcIFQIpwAZDyc/oDt5/0Pv13T3/e9gkC26/vqanJD1O2Py9Tn3fLe3na9gk+dlwApAgXACnCBUCKcAGQIlwApAgXACnCBUCKcAGQIlwA3Dk5422TAU6flJ/6vKee/t23TZy4ZWLC1Drf8l4+tX2Cz2foeT79eXZcAKQIFwApwgVAinABkCJcAKQIFwApwgVAinABkCJcAKR8voePNG+fhPDU9gkWt6zzU1MTSqZM3cct63eaddn1+2fHBUCKcAGQIlwApAgXACnCBUCKcAGQIlwApAgXACnCBUDK6yZnTE1guGVdnppav7dN2Jji+/id9Xvq+7LfITsuAFKEC4AU4QIgRbgASBEuAFKEC4AU4QIgRbgASBEuAFJ+3japwUSMP1uXKVOTAd72vNzyfTy1fdLK9uubYscFQIpwAZAiXACkCBcAKcIFQIpwAZAiXACkCBcAKcIFQMrY5IypE/BPTZ1Ev+WE/tuel9OmnqvTtk9+2D5xYmpyy3f592bHBUCKcAGQIlwApAgXACnCBUCKcAGQIlwApAgXACnCBcCdkzO2nzA/bWqSxNtOwN/yXE1NpnibW963p275vM/h9bPjAiBFuABIES4AUoQLgBThAiBFuABIES4AUoQLgBThAiDl890+kuChqUkSU265jynbH/vtk0xuWefTbvneppicAcCV/FchACnCBUCKcAGQIlwApAgXACnCBUCKcAGQIlwApPzcMsHi9En07dc3NeHgbZMVbplIsP152f55T02959+XvUd2XACkCBcAKcIFQIpwAZAiXACkCBcAKcIFQIpwAZAiXACkfL4Pj1xvnyAwdVL+tLedvH/b5IJb7vcp6/I76zdl6vfFjguAFOECIEW4AEgRLgBShAuAFOECIEW4AEgRLgBShAuAlJ+pP7x9wsFppycSTN3vLZMfnv7dWyaybL++WyZJ8DvvpR0XACnCBUCKcAGQIlwApAgXACnCBUCKcAGQIlwApAgXACljkzO2n+Tffn23TMTYPvHkKdf3Ozwvd6/LU3ZcAKQIFwApwgVAinABkCJcAKQIFwApwgVAinABkCJcANw5OWPqxPXUifC33e/bnF7n7ZNW3uZt38d3+e/B6euz4wIgRbgASBEuAFKEC4AU4QIgRbgASBEuAFKEC4AU4QIg5fN9eKT59En00yeppyYhTN3HaVMTIm5Zv9O2r8vUe7T9vXzbfUyx4wIgRbgASBEuAFKEC4AU4QIgRbgASBEuAFKEC4AU4QIgZWxyxmlTJ723TyR424QNEwl2rcst1/fU9skyt9yvHRcAKcIFQIpwAZAiXACkCBcAKcIFQIpwAZAiXACkCBcAKT+3THTYfpL/6edtn/wwtS6nbV/n0393+8STt9n+fXyW/47bcQGQIlwApAgXACnCBUCKcAGQIlwApAgXACnCBUCKcAFw5+SM07afqN9+wvz0BIapCRFTn7fd2+73qe2TJLZPxHhq+++BHRcAKcIFQIpwAZAiXACkCBcAKcIFQIpwAZAiXACkCBcAKZ/vwyPSUyf5t5/gnjp5P2XqPm753rY/B9vfcxNFfsf2CSB2XACkCBcAKcIFQIpwAZAiXACkCBcAKcIFQIpwAZAiXACk/Dz9h9tP8p++vu33e9ot9/u252Dq+qYmo2yfeHLa9kk636H1s+MCIEW4AEgRLgBShAuAFOECIEW4AEgRLgBShAuAFOEC4M7JGdtPtj81dX23TBp46m3Xt90t7+/2341bJst8lr8fdlwApAgXACnCBUCKcAGQIlwApAgXACnCBUCKcAGQIlwApHy+h48+33JC/7Rb7uO07RM2tpuaTPHU9u/tbev3veT3xY4LgBThAiBFuABIES4AUoQLgBThAiBFuABIES4AUoQLgJSfp/9w+8lsEzv+bF2eOv39Tj0vJjpYv/9iarLH9kkwn6HfFzsuAFKEC4AU4QIgRbgASBEuAFKEC4AU4QIgRbgASBEuAO6cnLF9wsEtf/eWiRjbJ63cMmFju7et3/bJQdsnET1lxwVAinABkCJcAKQIFwApwgVAinABkCJcAKQIFwApwgXAnZMzbjnZftrTk+PbJ0RsP1F/ep23/92p63tq+/Vt/12bmizzueR33I4LgBThAiBFuABIES4AUoQLgBThAiBFuABIES4AUoQLgDsnZzz1tgkRb/u7U5MpptZv6j6m1nnqfqe+39Prcvrvnva95PfZjguAFOECIEW4AEgRLgBShAuAFOECIEW4AEgRLgBShAuAd0/O2D4hwon/PzM1qeGWiRPb34+ntq/fLe/5dp+hSSt2XACkCBcAKcIFQIpwAZAiXACkCBcAKcIFQIpwAZAiXACkjE3OeJvTJ8e3n9DfPhFju6nnZfs63/Ie3XIfU8+fHRcAKcIFQIpwAZAiXACkCBcAKcIFQIpwAZAiXACkCBcAKSZnXD5JYsrUpIapddn+fWy/31smSWy/j8/yCRtP2XEBkCJcAKQIFwApwgVAinABkCJcAKQIFwApwgVAinABkDI2OcOkgd/xtgkWT03dx/YJKlPPC3/mO/S+Tb1HdlwApAgXACnCBUCKcAGQIlwApAgXACnCBUCKcAGQIlwAvHtyhpPyv7Mu2yc6TD0Hb/u77Jrsccvz910+kcWOC4AU4QIgRbgASBEuAFKEC4AU4QIgRbgASBEuAFKEC4CUz/f0EWkA+B/ZcQGQIlwApAgXACnCBUCKcAGQIlwApAgXACnCBUCKcAHwV8k/wmi0jr0iChQAAAAASUVORK5CYII=' style='width:100%;height:100%;object-fit:contain;' />
     </div>
     
 
-    <div style="position: absolute; left: 748px; top: 1822px; width: 462px; height: 95px; background-color: #f07020; overflow: hidden;">
+        <div id="url" class="region xs url" style="position: absolute; left: 748px; top: 1822px; width: 462px; height: 95px; overflow: hidden;">
       https://example.com/rsvp
     </div>
     

@@ -21,6 +21,12 @@ if sys.platform == "darwin":
 
 from weasyprint import CSS, HTML
 import pypdfium2 as pdfium
+import base64
+import io as _io
+try:
+    import qrcode
+except Exception:
+    qrcode = None
 
 
 def render_template(
@@ -33,9 +39,16 @@ def render_template(
     regions_data = _load_yaml(regions_file)
     template_path = _resolve_sibling(regions_file, Path(regions_data["template"]))
 
+    # Load raw content file to get CSS reference
+    raw_content = _load_yaml(content_file)
     content_map = _load_content(content_file)
+    
+    # Load CSS from regions or content file
     css_paths = [Path(p) for p in regions_data.get("css", []) or []]
-    css_text = _load_css(css_paths, regions_file=regions_file, css_dir=css_dir)
+    if not css_paths and "css" in raw_content:
+        css_paths = [Path(raw_content["css"])]
+    
+    css_text = _load_css(css_paths, regions_file=regions_file, content_file=content_file, css_dir=css_dir)
 
     # Get template dimensions
     template_img = Image.open(template_path)
@@ -56,6 +69,21 @@ def render_template(
         elif region_id is not None and str(region_id) in content_map:
             html = content_map[str(region_id)]
 
+        # Special handling: generate QR code image when region name is 'qr_code'
+        if (name == "qr_code" or str(region_id).lower() == "qr_code") and (content_map.get("url") or content_map.get("qr_code")):
+            url_value = content_map.get("qr_code") or content_map.get("url")
+            if qrcode:
+                qr = qrcode.QRCode(border=1, box_size=10)
+                qr.add_data(url_value)
+                qr.make(fit=True)
+                img_qr = qr.make_image(fill_color="black", back_color="white").convert("RGBA")
+                buf = _io.BytesIO()
+                img_qr.save(buf, format="PNG")
+                b64 = base64.b64encode(buf.getvalue()).decode("ascii")
+                html = f"<img alt='QR' src='data:image/png;base64,{b64}' style='width:100%;height:100%;object-fit:contain;' />"
+            else:
+                html = f"<div>QR: {url_value}</div>"
+
         if not html:
             continue
 
@@ -64,8 +92,22 @@ def render_template(
         w = int(region["width"])
         h = int(region["height"])
 
+        # Compute area and assign size category
+        area = w * h
+        if area < 50_000:
+            size_class = "xs"
+        elif area < 150_000:
+            size_class = "sm"
+        elif area < 300_000:
+            size_class = "md"
+        else:
+            size_class = "lg"
+
+        # Region identifier for id attribute
+        region_id_attr = (region.get("name") or str(region.get("id")) or "").strip()
+
         content_divs.append(f"""
-    <div style="position: absolute; left: {x}px; top: {y}px; width: {w}px; height: {h}px; overflow: hidden;">
+        <div id="{region_id_attr}" class="region {size_class} {name}" style="position: absolute; left: {x}px; top: {y}px; width: {w}px; height: {h}px; overflow: hidden;">
       {html}
     </div>
     """)
@@ -95,6 +137,17 @@ def render_template(
         width: {template_width}px;
         height: {template_height}px;
       }}
+            /* Size-based font scaling for regions */
+            .region {{
+                line-height: 1.2;
+            }}
+            .region.xs {{ font-size: 40px; }}
+            .region.sm {{ font-size: 60px; }}
+            .region.md {{ font-size: 80px; }}
+            .region.lg {{ font-size: 100px; }}
+            /* Specific tuning: URL regions often need smaller base size */
+            .region.url {{ font-size: 48px; word-wrap: break-word; overflow-wrap: anywhere; }}
+            .region.qr_code img {{ width: 100%; height: 100%; object-fit: contain; }}
       {css_text}
     </style>
   </head>
@@ -157,7 +210,7 @@ def _resolve_sibling(regions_file: Path, relative_or_abs: Path) -> Path:
     return relative_or_abs if relative_or_abs.is_absolute() else (regions_file.parent / relative_or_abs)
 
 
-def _load_css(css_paths: list[Path], *, regions_file: Path, css_dir: Path | None) -> str:
+def _load_css(css_paths: list[Path], *, regions_file: Path, content_file: Path | None = None, css_dir: Path | None) -> str:
     parts: list[str] = []
     for p in css_paths:
         candidate = p
@@ -165,7 +218,21 @@ def _load_css(css_paths: list[Path], *, regions_file: Path, css_dir: Path | None
             if css_dir is not None:
                 candidate = css_dir / candidate
             else:
-                candidate = regions_file.parent / candidate
+                # Try resolving in order: cwd, content file parent, regions file parent
+                candidates = [Path.cwd() / candidate]
+                if content_file is not None:
+                    candidates.append(content_file.parent / candidate)
+                candidates.append(regions_file.parent / candidate)
+                
+                candidate = None
+                for c in candidates:
+                    if c.exists():
+                        candidate = c
+                        break
+                
+                if candidate is None:
+                    candidate = candidates[0]  # Default to first if none found
+        
         if candidate.exists():
             parts.append(candidate.read_text(encoding="utf-8"))
     return "\n".join(parts)
