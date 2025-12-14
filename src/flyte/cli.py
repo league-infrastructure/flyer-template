@@ -6,6 +6,8 @@ from pathlib import Path
 
 from flyte.flyte import Flyte
 
+__version__ = "0.1.1"
+
 
 def cmd_import(args: argparse.Namespace) -> None:
     """Handle the import subcommand."""
@@ -84,6 +86,13 @@ def main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser(
         prog="flyte",
         description="Flyer template rendering system",
+    )
+    
+    parser.add_argument(
+        "-v",
+        "--version",
+        action="version",
+        version=f"%(prog)s {__version__}",
     )
     
     subparsers = parser.add_subparsers(dest="command", required=True, help="Available commands")
