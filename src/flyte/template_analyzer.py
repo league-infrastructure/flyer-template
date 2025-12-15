@@ -6,6 +6,7 @@ from typing import Any
 
 import cv2
 import numpy as np
+import pytesseract
 import yaml
 from PIL import Image, ImageDraw, ImageFont
 
@@ -19,6 +20,7 @@ class Region:
     height: int
     background_color: str
     contour: np.ndarray
+    text: str = ""
 
 
 def analyze_template(
@@ -61,6 +63,9 @@ def analyze_template(
         background_sample_offset=background_sample_offset,
     )
 
+    # Extract text from regions using OCR
+    regions = _extract_text_from_regions(img_bgr, regions)
+
     template_img = _make_template_image(
         img_bgr,
         regions,
@@ -74,7 +79,7 @@ def analyze_template(
         label_font_path=label_font_path,
     )
 
-    name_map = _guess_region_names(regions)
+    role_map = _guess_region_names(regions)
 
     # Save files in the project directory
     src_path = project_dir / src_name
@@ -100,14 +105,15 @@ def analyze_template(
                 
                 # Validate that regions match (same count and positions)
                 if len(existing_regions) == len(regions):
-                    # Create a map of (x, y, width, height) -> name from existing regions
+                    # Create a map of (x, y, width, height) -> (name, role) from existing regions
                     existing_map = {}
                     for er in existing_regions:
                         key = (er.get("x"), er.get("y"), er.get("width"), er.get("height"))
-                        existing_map[key] = er.get("name", "")
+                        existing_map[key] = (er.get("name", ""), er.get("role", ""))
                     
                     # Check if all new regions match existing positions
                     all_match = True
+                    text_map = {r.id: r.text for r in regions}
                     for r in regions:
                         key = (r.x, r.y, r.width, r.height)
                         if key not in existing_map:
@@ -115,17 +121,19 @@ def analyze_template(
                             break
                     
                     if all_match:
-                        # Preserve names from existing file
+                        # Preserve roles from existing file; use OCR text for names
                         for r in regions:
                             key = (r.x, r.y, r.width, r.height)
-                            if key in existing_map and existing_map[key]:
-                                name_map[r.id] = existing_map[key]
+                            if key in existing_map:
+                                _, existing_role = existing_map[key]
+                                if existing_role:
+                                    role_map[r.id] = existing_role
                         
-                        print(f"Preserved region names from existing {regions_name}")
+                        print(f"Preserved region roles from existing {regions_name}")
                     else:
-                        print(f"Warning: Region positions changed, using auto-generated names")
+                        print(f"Warning: Region positions changed, using auto-detected roles")
                 else:
-                    print(f"Warning: Region count changed ({len(existing_regions)} -> {len(regions)}), using auto-generated names")
+                    print(f"Warning: Region count changed ({len(existing_regions)} -> {len(regions)}), using auto-detected roles")
         except Exception as e:
             print(f"Warning: Could not load existing regions file: {e}")
 
@@ -141,7 +149,8 @@ def analyze_template(
         "regions": [
             {
                 "id": r.id,
-                "name": name_map.get(r.id, ""),
+                "name": r.text,
+                "role": role_map.get(r.id, ""),
                 "x": r.x,
                 "y": r.y,
                 "width": r.width,
@@ -224,6 +233,44 @@ def _build_regions(
             )
         )
     return regions
+
+
+def _extract_text_from_regions(img_bgr: np.ndarray, regions: list[Region]) -> list[Region]:
+    """Extract text from placeholder regions using OCR."""
+    updated_regions = []
+    
+    for region in regions:
+        # Extract the region from the image
+        roi = img_bgr[region.y:region.y + region.height, region.x:region.x + region.width]
+        
+        # Convert BGR to RGB for PIL
+        roi_rgb = cv2.cvtColor(roi, cv2.COLOR_BGR2RGB)
+        pil_image = Image.fromarray(roi_rgb)
+        
+        # Use pytesseract to extract text
+        try:
+            text = pytesseract.image_to_string(pil_image, config='--psm 6').strip()
+            # Clean up the text - remove extra whitespace and newlines
+            text = ' '.join(text.split())
+        except Exception as e:
+            print(f"Warning: OCR failed for region {region.id}: {e}")
+            text = ""
+        
+        # Create new Region with extracted text
+        updated_regions.append(
+            Region(
+                id=region.id,
+                x=region.x,
+                y=region.y,
+                width=region.width,
+                height=region.height,
+                background_color=region.background_color,
+                contour=region.contour,
+                text=text,
+            )
+        )
+    
+    return updated_regions
 
 
 def _guess_region_names(regions: list[Region]) -> dict[int, str]:

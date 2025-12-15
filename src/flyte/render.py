@@ -84,15 +84,19 @@ def compile_template(
     for region in regions:
         region_id = region.get("id")
         name = (region.get("name") or "").strip()
+        role = (region.get("role") or "").strip()
 
         html = None
+        # Try to find content by name first, then role, then id
         if name and name in content_map:
             html = content_map[name]
+        elif role and role in content_map:
+            html = content_map[role]
         elif region_id is not None and str(region_id) in content_map:
             html = content_map[str(region_id)]
 
-        # Special handling: generate QR code image when region name is 'qr_code'
-        if (name == "qr_code" or str(region_id).lower() == "qr_code") and (content_map.get("url") or content_map.get("qr_code")):
+        # Special handling: generate QR code image when region name or role is 'qr_code'
+        if (name == "qr_code" or role == "qr_code" or str(region_id).lower() == "qr_code") and (content_map.get("url") or content_map.get("qr_code")):
             url_value = content_map.get("qr_code") or content_map.get("url")
             if qrcode:
                 qr = qrcode.QRCode(border=1, box_size=10)
@@ -252,10 +256,14 @@ def render_template(
     for region in regions:
         region_id = region.get("id")
         name = (region.get("name") or "").strip()
+        role = (region.get("role") or "").strip()
 
         html = None
+        # Try to find content by name first, then role, then id
         if name and name in content_map:
             html = content_map[name]
+        elif role and role in content_map:
+            html = content_map[role]
         elif region_id is not None and str(region_id) in content_map:
             html = content_map[str(region_id)]
 

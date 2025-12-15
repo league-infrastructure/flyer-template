@@ -92,7 +92,8 @@ Each region in the `regions` array contains:
 
 ```yaml
 - id: 1
-  name: "content"
+  name: "Pack Meeting"
+  role: "content"
   x: 71
   y: 439
   width: 390
@@ -108,9 +109,15 @@ Each region in the `regions` array contains:
 - Corresponds to the large numbers shown in `reference.png`
 
 **`name`** (string, optional)
-- Human-readable identifier for the region
-- Auto-detected from common naming patterns (e.g., "content", "title", "date", "time")
+- Text extracted from the placeholder region using OCR (Optical Character Recognition)
+- Automatically populated during import by reading any text visible in the placeholder area
+- Can be manually edited after import for clarity or corrections
 - Used to map content in YAML/JSON content files
+
+**`role`** (string, optional)
+- Semantic role of the region auto-detected from position, size, and aspect ratio
+- Common values: \"content\", \"content2\", \"title\", \"date\", \"time\", \"place\", \"url\", \"qr_code\"
+- Helps understand the intended purpose of each region
 - **Preserved during re-import** if region positions remain unchanged
 
 **`x`** (integer, required)
@@ -141,23 +148,26 @@ During rendering, regions are automatically classified by area for font scaling:
 - **md** (medium): 150,000 - 300,000 px² → 72px base font
 - **lg** (large): > 300,000 px² → 90px base font
 
-## Re-Import and Name Preservation
+## Re-Import and Role Preservation
 
 When running `flyte import` on a source file that already has an existing `regions.yaml`:
 
 **Without `--replace` flag** (default):
 1. Loads the existing `regions.yaml`
 2. Validates that region count and positions (x, y, width, height) match
-3. If positions match exactly, preserves the `name` field from the existing file
-4. Outputs: "Preserved region names from existing regions.yaml"
+3. If positions match exactly, preserves the `role` field from the existing file
+4. Re-extracts text using OCR to populate the `name` field (text may change if placeholder text was updated)
+5. Outputs: "Preserved region roles from existing regions.yaml"
 
 **With `--replace` flag**:
 - Overwrites `regions.yaml` completely
-- Generates new auto-detected names
-- Ignores any existing region names
+- Extracts new text via OCR for names
+- Generates new auto-detected roles
+- Ignores any existing region metadata
 
 This allows users to:
-- Adjust import parameters (color tolerance, dilation, etc.) without losing custom region names
+- Adjust import parameters (color tolerance, dilation, etc.) without losing custom region roles
+- Update placeholder text and have it automatically re-extracted
 - Re-generate reference images while preserving metadata
 - Safely update templates when only visual elements change
 
@@ -215,15 +225,18 @@ Uses WeasyPrint (HTML → PDF) and pypdfium2 (PDF → PNG) for high-quality rend
 4. Design regions with expected content size in mind
 
 ### Region Naming
-1. Manually edit `regions.yaml` to assign meaningful names
-2. Use consistent naming conventions across templates
-3. Common names: `title`, `subtitle`, `content`, `date`, `time`, `location`, `url`, `qr_code`
+1. Include descriptive text in template placeholders for automatic OCR extraction
+2. Manually edit `name` field in `regions.yaml` to correct OCR errors or improve clarity
+3. Use consistent naming conventions across templates
+4. Common names: `title`, `subtitle`, `content`, `date`, `time`, `location`, `url`, `qr_code`
+5. The `role` field provides semantic context; `name` should be human-readable text
 
 ### Region Management
 1. Avoid re-importing with `--replace` unless necessary
-2. Re-import without `--replace` when adjusting detection parameters
+2. Re-import without `--replace` when adjusting detection parameters or updating placeholder text
 3. Check region positions in `reference.png` to ensure correct detection
 4. Validate region count and positions after import
+5. Review OCR-extracted names and edit for accuracy if needed
 
 ### Content Files
 1. Use region names rather than IDs when possible (more maintainable)

@@ -1,6 +1,6 @@
 FROM python:3.13-slim
 
-# Install system dependencies for WeasyPrint and OpenCV
+# Install system dependencies for WeasyPrint, OpenCV, and Tesseract OCR
 RUN apt-get update && apt-get install -y \
     libcairo2 \
     libpango-1.0-0 \
@@ -10,6 +10,8 @@ RUN apt-get update && apt-get install -y \
     shared-mime-info \
     libgl1 \
     libglib2.0-0 \
+    tesseract-ocr \
+    tesseract-ocr-eng \
     && rm -rf /var/lib/apt/lists/*
 
 # Set working directory
