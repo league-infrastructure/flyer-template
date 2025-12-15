@@ -129,9 +129,14 @@ def analyze_template(
         except Exception as e:
             print(f"Warning: Could not load existing regions file: {e}")
 
+    # Get template dimensions
+    template_height, template_width = img_bgr.shape[:2]
+
     # Build regions data without template/reference fields
     data: dict[str, Any] = {
         "content_color": placeholder_color.lower(),
+        "width": int(template_width),
+        "height": int(template_height),
         "css": [],
         "regions": [
             {

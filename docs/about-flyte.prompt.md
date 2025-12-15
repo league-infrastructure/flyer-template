@@ -69,12 +69,18 @@ The metadata file containing structured information about all detected content r
 
 ```yaml
 content_color: '#6fe600'
+width: 816
+height: 1056
 css: []
 regions:
   - [region definitions]
 ```
 
 **`content_color`**: The hex color code used for placeholder detection. Preserved for reference and potential re-import.
+
+**`width`**: The width of the template image in pixels. Used for layout calculations and validation.
+
+**`height`**: The height of the template image in pixels. Used for layout calculations and validation.
 
 **`css`**: Array of CSS file paths to apply during rendering. Can be populated manually or left empty to use inline styles.
 
