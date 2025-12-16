@@ -1,5 +1,19 @@
 # flyer-template
 
+This flyer tempaltes system create a web-directory of templates for social media
+and print marketing that can be used to insert content into images created in
+Canva. Designers create images that have green content boxes, and the `flyte`
+program will extract information about the regions and remove the green boxes,
+so other web applications can overlay content on the page. 
+
+You can load the images into the `source` directory in this repo, rin the `flyte
+import` programs, and commit the repo, but the repo also has a github workflow
+that will aloow you to just put the image into the `source` directory via Github
+and commit it. 
+
+
+## Flyte program
+
 This repo is an installable Python application for creating and rendering flyer templates.
 
 - Importable application/library code lives in `src/flyte/`.
