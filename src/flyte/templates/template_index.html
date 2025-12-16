@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ template_name }}</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 2rem 1rem;
+    }
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      padding: 2rem;
+    }
+    h1 {
+      color: #667eea;
+      margin-bottom: 0.5rem;
+      font-size: 2rem;
+    }
+    .breadcrumb {
+      color: #666;
+      margin-bottom: 2rem;
+      font-size: 0.9rem;
+    }
+    .breadcrumb a {
+      color: #667eea;
+      text-decoration: none;
+    }
+    .breadcrumb a:hover {
+      text-decoration: underline;
+    }
+    .file-grid {
+      display: grid;
+      gap: 2rem;
+    }
+    .file-item {
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 1.5rem;
+      background: #f8f9fa;
+    }
+    .file-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 1rem;
+      gap: 1rem;
+    }
+    .file-name {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #333;
+      font-family: monospace;
+      word-break: break-all;
+    }
+    .file-actions {
+      display: flex;
+      gap: 0.5rem;
+      flex-shrink: 0;
+    }
+    .btn {
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: 4px;
+      font-size: 0.875rem;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: background-color 0.2s;
+      white-space: nowrap;
+    }
+    .btn-primary {
+      background: #667eea;
+      color: white;
+    }
+    .btn-primary:hover {
+      background: #5568d3;
+    }
+    .btn-secondary {
+      background: #e0e0e0;
+      color: #333;
+    }
+    .btn-secondary:hover {
+      background: #d0d0d0;
+    }
+    .image-preview {
+      margin-top: 1rem;
+      text-align: center;
+    }
+    .image-preview img {
+      max-width: 100%;
+      max-height: 300px;
+      border-radius: 4px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      cursor: pointer;
+    }
+    .yaml-preview {
+      margin-top: 1rem;
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      padding: 1rem;
+    }
+    .yaml-preview pre {
+      margin: 0;
+      font-size: 0.85rem;
+      font-family: 'Monaco', 'Menlo', monospace;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.9);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+    .modal.active {
+      display: flex;
+    }
+    .modal-content img {
+      max-width: 90%;
+      max-height: 90vh;
+      object-fit: contain;
+    }
+    .modal-close {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: white;
+      border: none;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      font-size: 1.5rem;
+      cursor: pointer;
+      line-height: 1;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>📄 {{ template_name }}</h1>
+    <div class="breadcrumb">
+      <a href="../">← Back to templates</a>
+    </div>
+    
+    <div class="file-grid" id="file-grid">
+      <!-- Files will be populated by JavaScript -->
+    </div>
+  </div>
+
+  <div class="modal" id="modal">
+    <button class="modal-close" onclick="closeModal()">×</button>
+    <div class="modal-content" id="modal-content"></div>
+  </div>
+
+  <script>
+    // Determine the directory path for the back link
+    const pathParts = window.location.pathname.split('/').filter(p => p);
+    // Remove the template name (last part) to get the directory
+    const directory = pathParts.length > 1 ? pathParts[pathParts.length - 2] : '';
+    
+    // Update breadcrumb to point to root with directory fragment
+    const breadcrumb = document.querySelector('.breadcrumb a');
+    if (directory) {
+      breadcrumb.href = `../../#${directory}`;
+    } else {
+      breadcrumb.href = '../../';
+    }
+    
+    const files = [
+      { name: 'src.png', type: 'image' },
+      { name: 'template.png', type: 'image' },
+      { name: 'reference.png', type: 'image' },
+      { name: 'regions.yaml', type: 'yaml' }
+    ];
+
+    async function loadFiles() {
+      const grid = document.getElementById('file-grid');
+      
+      for (const file of files) {
+        // Check if file exists
+        try {
+          const response = await fetch(file.name, { method: 'HEAD' });
+          if (!response.ok) continue;
+        } catch (e) {
+          continue;
+        }
+        
+        const item = document.createElement('div');
+        item.className = 'file-item';
+        
+        let content = `
+          <div class="file-header">
+            <div class="file-name">${file.name}</div>
+            <div class="file-actions">
+              <a href="${file.name}" class="btn btn-primary" target="_blank">View</a>
+              <a href="${file.name}" class="btn btn-secondary" download>Download</a>
+            </div>
+          </div>
+        `;
+        
+        if (file.type === 'image') {
+          content += `
+            <div class="image-preview">
+              <img src="${file.name}" alt="${file.name}" onclick="openModal('${file.name}')">
+            </div>
+          `;
+        } else if (file.type === 'yaml') {
+          content += `<div class="yaml-preview" id="yaml-${file.name}"></div>`;
+        }
+        
+        item.innerHTML = content;
+        grid.appendChild(item);
+        
+        // Load YAML preview
+        if (file.type === 'yaml') {
+          loadYamlPreview(file.name);
+        }
+      }
+    }
+    
+    async function loadYamlPreview(filename) {
+      try {
+        const response = await fetch(filename);
+        const text = await response.text();
+        const preview = document.getElementById(`yaml-${filename}`);
+        preview.innerHTML = `<pre>${escapeHtml(text)}</pre>`;
+      } catch (e) {
+        console.error('Failed to load YAML preview:', e);
+      }
+    }
+    
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+    
+    function openModal(imageSrc) {
+      const modal = document.getElementById('modal');
+      const content = document.getElementById('modal-content');
+      content.innerHTML = `<img src="${imageSrc}" alt="Preview">`;
+      modal.classList.add('active');
+    }
+    
+    function closeModal() {
+      document.getElementById('modal').classList.remove('active');
+    }
+    
+    document.getElementById('modal').addEventListener('click', function(e) {
+      if (e.target === this) {
+        closeModal();
+      }
+    });
+    
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        closeModal();
+      }
+    });
+    
+    loadFiles();
+  </script>
+</body>
+</html>

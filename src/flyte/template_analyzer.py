@@ -164,6 +164,9 @@ def analyze_template(
     with regions_path.open("w", encoding="utf-8") as f:
         yaml.safe_dump(data, f, sort_keys=False)
 
+    # Create index.html for the template directory
+    _create_template_index_html(project_dir, base)
+
     return {
         "template": src_path,
         "reference": reference_path,
@@ -523,3 +526,26 @@ def _find_font_path() -> str | None:
         if p.exists():
             return str(p)
     return None
+
+
+def _create_template_index_html(template_dir: Path, template_name: str) -> None:
+    """Create an index.html file in the template directory listing all files."""
+    # Get path to the template HTML file
+    templates_dir = Path(__file__).parent / "templates"
+    template_html = templates_dir / "template_index.html"
+    
+    if not template_html.exists():
+        print(f"Warning: Template index HTML not found at {template_html}")
+        return
+    
+    # Read the template
+    with template_html.open('r', encoding='utf-8') as f:
+        html_content = f.read()
+    
+    # Replace template name placeholder
+    html_content = html_content.replace('{{ template_name }}', template_name)
+    
+    # Write to template directory
+    index_path = template_dir / "index.html"
+    with index_path.open('w', encoding='utf-8') as f:
+        f.write(html_content)
