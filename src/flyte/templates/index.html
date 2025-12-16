@@ -231,7 +231,7 @@
           showTemplatesInDirectory(data.templates, currentDir);
         } else {
           // Show directory index
-          showDirectoryIndex(data.templates);
+          showDirectoryIndex(data.templates, data.repo_url);
         }
         
       } catch (error) {
@@ -241,7 +241,7 @@
       }
     }
     
-    function showDirectoryIndex(templates) {
+    function showDirectoryIndex(templates, repoUrl) {
       // Extract unique directories
       const directories = new Map();
       
@@ -274,9 +274,29 @@
       
       document.getElementById('template-count').textContent = dirTemplates.length;
       document.querySelector('.stat-label').textContent = 'Templates';
-      document.querySelector('.subtitle').innerHTML = `
-        <a href="#" style="color: #667eea; text-decoration: none;" onclick="setCurrentDirectory(''); loadTemplates(); return false;">← Back to directories</a> / ${directory}
-      `;
+      // Build subtitle with back link and optional GitHub upload button
+      (async () => {
+        try {
+          const res = await fetch('index.json');
+          const data = await res.json();
+          const repoUrl = data.repo_url ? data.repo_url.replace(/\/$/, '') : null;
+          const uploadUrl = repoUrl ? `${repoUrl}/upload/master/source/${directory}` : null;
+          const backLink = `<a href="#" style="color: #667eea; text-decoration: none;" onclick="setCurrentDirectory(''); loadTemplates(); return false;">← Back to directories</a> / ${directory}`;
+          const button = uploadUrl ? `
+            <a href="${uploadUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-secondary" style="margin-left: 1rem; vertical-align: middle;">
+              <span style="display:inline-flex; align-items:center; gap:0.5rem;">
+                <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false" style="vertical-align:middle; fill: currentColor;">
+                  <path d="M12 2C6.48 2 2 6.58 2 12.26c0 4.52 2.87 8.35 6.85 9.71.5.09.68-.22.68-.49 0-.24-.01-.87-.01-1.71-2.79.62-3.38-1.18-3.38-1.18-.46-1.19-1.12-1.51-1.12-1.51-.91-.64.07-.63.07-.63 1.01.07 1.54 1.06 1.54 1.06.9 1.57 2.37 1.12 2.94.86.09-.67.35-1.12.63-1.38-2.23-.26-4.57-1.14-4.57-5.08 0-1.12.39-2.03 1.03-2.75-.1-.26-.45-1.32.1-2.75 0 0 .84-.27 2.76 1.05.8-.22 1.66-.33 2.52-.33.86 0 1.73.11 2.52.33 1.92-1.32 2.75-1.05 2.75-1.05.56 1.43.21 2.49.11 2.75.64.72 1.03 1.63 1.03 2.75 0 3.95-2.35 4.81-4.59 5.07.36.32.68.95.68 1.92 0 1.39-.01 2.51-.01 2.85 0 .27.18.59.69.49 3.97-1.36 6.84-5.19 6.84-9.71C22 6.58 17.52 2 12 2Z"/>
+                </svg>
+                Add Source File
+              </span>
+            </a>
+          ` : '';
+          document.querySelector('.subtitle').innerHTML = `${backLink} ${button}`;
+        } catch {
+          document.querySelector('.subtitle').innerHTML = `<a href="#" style="color: #667eea; text-decoration: none;" onclick="setCurrentDirectory(''); loadTemplates(); return false;">← Back to directories</a> / ${directory}`;
+        }
+      })();
       
       const grid = document.getElementById('templates-grid');
       grid.innerHTML = '';
@@ -295,7 +315,7 @@
         setCurrentDirectory(dir);
         loadTemplates();
       };
-      
+
       card.innerHTML = `
         <div class="template-header">
           <div class="template-name">📁 ${dir}</div>

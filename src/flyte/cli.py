@@ -15,6 +15,7 @@ def cmd_import(args: argparse.Namespace) -> None:
     """Handle the import subcommand."""
     src = Path(args.source)
     out_dir = Path(args.output) if args.output else None
+    repo_url = args.repo_url if hasattr(args, 'repo_url') else None
     app = Flyte(data_dir=Path.cwd())
     
     # Check if source is a directory
@@ -93,6 +94,11 @@ def cmd_import(args: argparse.Namespace) -> None:
             "templates": templates_index,
             "count": len(templates_index)
         }
+        
+        if repo_url:
+            index_data["repo_url"] = repo_url
+            # Extract source directory path for upload links
+            index_data["source_path"] = "source"
         
         with index_path.open('w', encoding='utf-8') as f:
             json.dump(index_data, f, indent=2)
@@ -250,6 +256,12 @@ def main(argv: list[str] | None = None) -> None:
         dest="replace",
         action="store_true",
         help="Replace existing regions.yaml (default: preserve region names if positions match)",
+    )
+    import_parser.add_argument(
+        "--repo-url",
+        dest="repo_url",
+        metavar="URL",
+        help="GitHub repository URL for 'Add Source File' buttons (e.g., https://github.com/owner/repo)",
     )
     import_parser.set_defaults(func=cmd_import)
     
