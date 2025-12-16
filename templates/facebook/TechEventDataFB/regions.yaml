@@ -13,7 +13,7 @@ regions:
   background_color: '#60c0d0'
 - id: 2
   name: slogan
-  role: time
+  role: content2
   x: 373
   y: 232
   width: 455
@@ -21,26 +21,26 @@ regions:
   background_color: '#60c0d0'
 - id: 3
   name: time
-  role: date
-  x: 381
+  role: time
+  x: 395
   y: 329
-  width: 455
+  width: 441
   height: 42
   background_color: '#e8f8f8'
 - id: 4
   name: date
-  role: place
-  x: 381
+  role: date
+  x: 395
   y: 386
-  width: 455
+  width: 441
   height: 41
   background_color: '#e8f8f8'
 - id: 5
   name: place
-  role: content2
+  role: place
   x: 395
   y: 442
-  width: 420
+  width: 441
   height: 42
   background_color: '#e8f8f8'
 - id: 6

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import shutil
 import sys
 from pathlib import Path
 
@@ -97,6 +98,21 @@ def cmd_import(args: argparse.Namespace) -> None:
             json.dump(index_data, f, indent=2)
         
         print(f"Created index: {index_path}")
+        
+        # Copy index.html template to output directory
+        template_dir = Path(__file__).parent / "templates"
+        index_html_template = template_dir / "index.html"
+        
+        if out_dir:
+            index_html_dest = out_dir / "index.html"
+        else:
+            index_html_dest = src / "index.html"
+        
+        if index_html_template.exists():
+            shutil.copy2(index_html_template, index_html_dest)
+            print(f"Created gallery: {index_html_dest}")
+        else:
+            print(f"Warning: Template not found at {index_html_template}", file=sys.stderr)
     else:
         # Single file import (original behavior)
         result = app.import_template(

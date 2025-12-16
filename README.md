@@ -5,6 +5,7 @@ This repo is an installable Python application for creating and rendering flyer 
 - Importable application/library code lives in `src/flyte/`.
 - The `flyte` command is installed via a console-script entrypoint.
 - Web API available via FastAPI for remote rendering.
+- **Live template gallery**: Browse all templates at the [GitHub Pages site](https://league-infrastructure.github.io/flyer-template/)
 
 ## Workflow Overview
 
@@ -15,6 +16,16 @@ Flyte uses a three-step process to create flyers:
 3. **`render`** - Convert HTML to PNG or PDF for distribution
 
 For remote rendering, a **web service** accepts URLs and returns rendered PNG or PDF files using the same rendering engine.
+
+## Template Gallery
+
+All templates from the `source/` directory are automatically imported and published to GitHub Pages on every push to master. Visit the live gallery to:
+
+- Browse all available templates
+- Preview template and reference images
+- Download template assets (regions.yaml, source images)
+
+The gallery is automatically updated via GitHub Actions whenever templates are added or modified in the `source/` directory.
 
 ## Try it locally (pip)
 
@@ -37,8 +48,14 @@ uv run flyte
 Generates a directory with `src.png`, `template.png`, `reference.png`, and `regions.yaml`.
 
 ```zsh
+# Import a single template
 flyte import path/to/template.png -o output_dir/
+
+# Import entire directory (with subdirectories)
+flyte import source/ -o templates/
 ```
+
+When importing a directory, an `index.json` file is automatically created listing all templates.
 
 Optional tuning:
 

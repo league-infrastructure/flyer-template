@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Flyer Templates</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 2rem 1rem;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      padding: 2rem;
+    }
+    h1 {
+      color: #667eea;
+      margin-bottom: 0.5rem;
+      font-size: 2.5rem;
+    }
+    .subtitle {
+      color: #666;
+      margin-bottom: 2rem;
+      font-size: 1.1rem;
+    }
+    .stats {
+      display: flex;
+      gap: 2rem;
+      margin-bottom: 2rem;
+      padding: 1rem;
+      background: #f8f9fa;
+      border-radius: 8px;
+    }
+    .stat {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .stat-value {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #667eea;
+    }
+    .stat-label {
+      color: #666;
+      font-size: 0.9rem;
+    }
+    .templates-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 2rem;
+      margin-top: 2rem;
+    }
+    .template-card {
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      overflow: hidden;
+      transition: transform 0.2s, box-shadow 0.2s;
+      background: white;
+    }
+    .template-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+    }
+    .template-header {
+      padding: 1rem;
+      background: #f8f9fa;
+      border-bottom: 1px solid #e0e0e0;
+    }
+    .template-name {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #333;
+      word-break: break-word;
+    }
+    .template-path {
+      font-size: 0.85rem;
+      color: #666;
+      font-family: monospace;
+      margin-top: 0.25rem;
+    }
+    .template-images {
+      background: #e0e0e0;
+    }
+    .image-container {
+      position: relative;
+      background: white;
+      aspect-ratio: 3/4;
+      overflow: hidden;
+    }
+    .image-container img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      cursor: pointer;
+    }
+    .image-label {
+      display: none;
+    }
+    .template-footer {
+      padding: 1rem;
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+    .btn {
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: 4px;
+      font-size: 0.875rem;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: background-color 0.2s;
+    }
+    .btn-primary {
+      background: #667eea;
+      color: white;
+    }
+    .btn-primary:hover {
+      background: #5568d3;
+    }
+    .btn-secondary {
+      background: #e0e0e0;
+      color: #333;
+    }
+    .btn-secondary:hover {
+      background: #d0d0d0;
+    }
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.9);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+    .modal.active {
+      display: flex;
+    }
+    .modal-content {
+      max-width: 90%;
+      max-height: 90%;
+    }
+    .modal-content img {
+      max-width: 100%;
+      max-height: 90vh;
+      object-fit: contain;
+    }
+    .modal-close {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: white;
+      border: none;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      font-size: 1.5rem;
+      cursor: pointer;
+      line-height: 1;
+    }
+    .loading {
+      text-align: center;
+      padding: 3rem;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>📄 Flyer Templates</h1>
+    <p class="subtitle">Browse and download template assets</p>
+    
+    <div class="stats" id="stats">
+      <div class="stat">
+        <div>
+          <div class="stat-value" id="template-count">-</div>
+          <div class="stat-label">Templates</div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="templates-grid" id="templates-grid">
+      <div class="loading">Loading templates...</div>
+    </div>
+  </div>
+
+  <div class="modal" id="modal">
+    <button class="modal-close" onclick="closeModal()">×</button>
+    <div class="modal-content" id="modal-content"></div>
+  </div>
+
+  <script>
+    // Get current directory from URL hash or default to root
+    function getCurrentDirectory() {
+      const hash = window.location.hash.slice(1);
+      return hash ? decodeURIComponent(hash) : '';
+    }
+    
+    // Set current directory in URL hash
+    function setCurrentDirectory(dir) {
+      window.location.hash = dir ? encodeURIComponent(dir) : '';
+    }
+    
+    async function loadTemplates() {
+      try {
+        const response = await fetch('index.json');
+        const data = await response.json();
+        
+        const currentDir = getCurrentDirectory();
+        
+        if (currentDir) {
+          // Show templates in the selected directory
+          showTemplatesInDirectory(data.templates, currentDir);
+        } else {
+          // Show directory index
+          showDirectoryIndex(data.templates);
+        }
+        
+      } catch (error) {
+        console.error('Failed to load templates:', error);
+        document.getElementById('templates-grid').innerHTML = 
+          '<div class="loading">Failed to load templates</div>';
+      }
+    }
+    
+    function showDirectoryIndex(templates) {
+      // Extract unique directories
+      const directories = new Map();
+      
+      templates.forEach(templatePath => {
+        const pathParts = templatePath.split('/');
+        if (pathParts.length > 1) {
+          const dir = pathParts[0];
+          if (!directories.has(dir)) {
+            directories.set(dir, []);
+          }
+          directories.get(dir).push(templatePath);
+        }
+      });
+      
+      document.getElementById('template-count').textContent = directories.size;
+      document.querySelector('.stat-label').textContent = 'Directories';
+      document.querySelector('.subtitle').textContent = 'Browse template directories';
+      
+      const grid = document.getElementById('templates-grid');
+      grid.innerHTML = '';
+      
+      for (const [dir, dirTemplates] of directories) {
+        const card = createDirectoryCard(dir, dirTemplates.length);
+        grid.appendChild(card);
+      }
+    }
+    
+    function showTemplatesInDirectory(templates, directory) {
+      const dirTemplates = templates.filter(path => path.startsWith(directory + '/'));
+      
+      document.getElementById('template-count').textContent = dirTemplates.length;
+      document.querySelector('.stat-label').textContent = 'Templates';
+      document.querySelector('.subtitle').innerHTML = `
+        <a href="#" style="color: #667eea; text-decoration: none;" onclick="setCurrentDirectory(''); loadTemplates(); return false;">← Back to directories</a> / ${directory}
+      `;
+      
+      const grid = document.getElementById('templates-grid');
+      grid.innerHTML = '';
+      
+      for (const templatePath of dirTemplates) {
+        const card = createTemplateCard(templatePath);
+        grid.appendChild(card);
+      }
+    }
+    
+    function createDirectoryCard(dir, count) {
+      const card = document.createElement('div');
+      card.className = 'template-card';
+      card.style.cursor = 'pointer';
+      card.onclick = () => {
+        setCurrentDirectory(dir);
+        loadTemplates();
+      };
+      
+      card.innerHTML = `
+        <div class="template-header">
+          <div class="template-name">📁 ${dir}</div>
+          <div class="template-path">${count} template${count !== 1 ? 's' : ''}</div>
+        </div>
+        <div style="padding: 3rem; text-align: center; background: #f8f9fa;">
+          <div style="font-size: 4rem; color: #667eea;">📂</div>
+        </div>
+        <div class="template-footer">
+          <div class="btn btn-primary" style="width: 100%; justify-content: center;">
+            View Templates →
+          </div>
+        </div>
+      `;
+      
+      return card;
+    }
+    
+    function createTemplateCard(templatePath) {
+      const card = document.createElement('div');
+      card.className = 'template-card';
+      
+      const pathParts = templatePath.split('/');
+      const templateName = pathParts[pathParts.length - 1];
+      
+      card.innerHTML = `
+        <div class="template-header">
+          <div class="template-name">${templateName}</div>
+          <div class="template-path">
+            <a href="${templatePath}/" target="_blank" style="color: #667eea; text-decoration: none; font-size: 0.8rem;">
+              🔗 ${templatePath}/
+            </a>
+          </div>
+        </div>
+        <div class="template-images">
+          <div class="image-container">
+            <img src="${templatePath}/reference.png" alt="Reference" onclick="openModal('${templatePath}/reference.png')">
+          </div>
+        </div>
+      `;
+      
+      return card;
+    }
+    
+    function openModal(imageSrc) {
+      const modal = document.getElementById('modal');
+      const content = document.getElementById('modal-content');
+      content.innerHTML = `<img src="${imageSrc}" alt="Preview">`;
+      modal.classList.add('active');
+    }
+    
+    function closeModal() {
+      document.getElementById('modal').classList.remove('active');
+    }
+    
+    document.getElementById('modal').addEventListener('click', function(e) {
+      if (e.target === this) {
+        closeModal();
+      }
+    });
+    
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        closeModal();
+      }
+    });
+    
+    // Handle browser back/forward navigation
+    window.addEventListener('hashchange', loadTemplates);
+    
+    loadTemplates();
+  </script>
+</body>
+</html>

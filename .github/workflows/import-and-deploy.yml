@@ -1,0 +1,82 @@
+name: Import Templates and Deploy
+
+on:
+  push:
+    branches:
+      - master
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  import-templates:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            tesseract-ocr \
+            tesseract-ocr-eng \
+            libgl1 \
+            libglib2.0-0
+      
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+        with:
+          version: "latest"
+      
+      - name: Install Python dependencies
+        run: uv pip install --system -e .
+      
+      - name: Import templates
+        run: uv run flyte import ./source/ -o ./templates
+      
+      - name: Upload templates artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: templates
+          path: templates/
+          retention-days: 1
+
+  deploy:
+    needs: import-templates
+    runs-on: ubuntu-latest
+    
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    
+    steps:
+      - name: Download templates artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: templates
+          path: templates/
+      
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+      
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: templates/
+      
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
