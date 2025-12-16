@@ -451,30 +451,7 @@ def _make_reference_image(
         else:
             label = str(r.id)
         
-        # Size the label using a real TrueType font when available.
-        # Scale based on region size - larger for big regions, smaller for small ones
-        min_dimension = min(r.width, r.height)
-        if min_dimension < 150:
-            # Very small regions (QR codes, URLs) - keep text tight
-            base_size = int(round(min_dimension * 0.4))
-            lo, hi = 16, min(64, base_size)
-            target_w = int(r.width * 0.8)
-            target_h = int(r.height * 0.8)
-        elif min_dimension < 300:
-            # Small regions - moderate sizing
-            base_size = int(round(min_dimension * 0.5))
-            lo, hi = 32, min(128, base_size)
-            target_w = int(r.width * 0.7)
-            target_h = int(r.height * 0.7)
-        else:
-            # Large regions - make text very visible
-            base_size = int(round(min_dimension * 0.7))
-            lo, hi = 128, max(800, base_size)
-            target_w = int(r.width * 0.6)
-            target_h = int(r.height * 0.6)
-            
         def _font_with_size(sz: int) -> ImageFont.ImageFont:
-
             if font_path:
                 try:
                     return ImageFont.truetype(font_path, size=sz)
@@ -482,23 +459,35 @@ def _make_reference_image(
                     pass
             return ImageFont.load_default()
 
-        # Binary search to fit within the box.
+        # Binary search to find the largest font that fits both width and height constraints
+        # with proper margins for readability
+        margin_factor = 0.85  # Use 85% of available space
+        target_w = int(r.width * margin_factor)
+        target_h = int(r.height * margin_factor)
+        
+        # Start with a reasonable range based on region size
+        min_dimension = min(r.width, r.height)
+        lo = max(12, min_dimension // 20)  # Minimum font size
+        hi = max(lo + 10, min_dimension * 2)  # Maximum font size to try
+        
         best = _font_with_size(lo)
         best_bbox = draw.textbbox((0, 0), label, font=best)
-        target_w = target_w
-        target_h = target_h
+        
         while lo <= hi:
             mid = (lo + hi) // 2
             candidate = _font_with_size(mid)
             bb = draw.textbbox((0, 0), label, font=candidate)
             tw = bb[2] - bb[0]
             th = bb[3] - bb[1]
+            
+            # Check if text fits within BOTH width and height constraints
             if tw <= target_w and th <= target_h:
                 best = candidate
                 best_bbox = bb
-                lo = mid + 1
+                lo = mid + 1  # Try larger
             else:
-                hi = mid - 1
+                hi = mid - 1  # Too big, try smaller
+        
         f = best
         bbox = best_bbox
     
