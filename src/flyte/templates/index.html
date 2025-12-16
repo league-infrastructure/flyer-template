@@ -325,16 +325,18 @@
         <div class="template-header">
           <div class="template-name">${templateName}</div>
           <div class="template-path">
-            <a href="${templatePath}/" target="_blank" style="color: #667eea; text-decoration: none; font-size: 0.8rem;">
+            <a href="${templatePath}/" style="color: #667eea; text-decoration: none; font-size: 0.8rem;">
               🔗 ${templatePath}/
             </a>
           </div>
         </div>
-        <div class="template-images">
-          <div class="image-container">
-            <img src="${templatePath}/reference.png" alt="Reference" onclick="openModal('${templatePath}/reference.png')">
+        <a href="${templatePath}/" style="display: block; text-decoration: none;">
+          <div class="template-images">
+            <div class="image-container">
+              <img src="${templatePath}/reference.png" alt="Reference" style="cursor: pointer;">
+            </div>
           </div>
-        </div>
+        </a>
       `;
       
       return card;
