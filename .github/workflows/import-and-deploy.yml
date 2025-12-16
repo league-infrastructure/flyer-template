@@ -45,7 +45,7 @@ jobs:
         run: uv pip install --system -e .
       
       - name: Import templates
-        run: uv run flyte import ./source/ -o ./templates
+        run: uv run flyte import ./source/ -o ./templates --repo-url https://github.com/${{ github.repository }}
       
       - name: Upload templates artifact
         uses: actions/upload-artifact@v4
