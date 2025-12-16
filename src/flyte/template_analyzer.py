@@ -451,8 +451,28 @@ def _make_reference_image(
         else:
             label = str(r.id)
         
-        # Aggressively size the label using a real TrueType font when available.
-        base_size = int(max(64, round(min(r.width, r.height) * 0.7)))
+        # Size the label using a real TrueType font when available.
+        # Scale based on region size - larger for big regions, smaller for small ones
+        min_dimension = min(r.width, r.height)
+        if min_dimension < 150:
+            # Very small regions (QR codes, URLs) - keep text tight
+            base_size = int(round(min_dimension * 0.4))
+            lo, hi = 16, min(64, base_size)
+            target_w = int(r.width * 0.8)
+            target_h = int(r.height * 0.8)
+        elif min_dimension < 300:
+            # Small regions - moderate sizing
+            base_size = int(round(min_dimension * 0.5))
+            lo, hi = 32, min(128, base_size)
+            target_w = int(r.width * 0.7)
+            target_h = int(r.height * 0.7)
+        else:
+            # Large regions - make text very visible
+            base_size = int(round(min_dimension * 0.7))
+            lo, hi = 128, max(800, base_size)
+            target_w = int(r.width * 0.6)
+            target_h = int(r.height * 0.6)
+            
         def _font_with_size(sz: int) -> ImageFont.ImageFont:
 
             if font_path:
@@ -463,11 +483,10 @@ def _make_reference_image(
             return ImageFont.load_default()
 
         # Binary search to fit within the box.
-        lo, hi = 32, max(200, base_size)
         best = _font_with_size(lo)
         best_bbox = draw.textbbox((0, 0), label, font=best)
-        target_w = int(r.width * 0.6)
-        target_h = int(r.height * 0.6)
+        target_w = target_w
+        target_h = target_h
         while lo <= hi:
             mid = (lo + hi) // 2
             candidate = _font_with_size(mid)
