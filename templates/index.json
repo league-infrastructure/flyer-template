@@ -1,0 +1,10 @@
+{
+  "templates": [
+    "calendar/EventsScience",
+    "calendar/ProgrammingMeritBadge",
+    "facebook/TechEventDataFB",
+    "flyers/TechEvent",
+    "flyers/TechEventOsvaldoQR"
+  ],
+  "count": 5
+}

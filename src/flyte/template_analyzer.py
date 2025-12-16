@@ -445,7 +445,12 @@ def _make_reference_image(
 
     font_path = "/System/Library/Fonts/Helvetica.ttc"
     for r in regions:
-        label = str(r.id)
+        # Create label with both ID and name
+        if r.text:
+            label = f"{r.id}: {r.text}"
+        else:
+            label = str(r.id)
+        
         # Aggressively size the label using a real TrueType font when available.
         base_size = int(max(64, round(min(r.width, r.height) * 0.7)))
         def _font_with_size(sz: int) -> ImageFont.ImageFont:

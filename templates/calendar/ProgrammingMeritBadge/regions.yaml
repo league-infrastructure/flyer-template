@@ -1,0 +1,53 @@
+content_color: '#6fe600'
+width: 1545
+height: 2000
+css: []
+regions:
+- id: 1
+  name: event_1
+  role: time
+  x: 33
+  y: 1115
+  width: 574
+  height: 137
+  background_color: '#60c0d0'
+- id: 2
+  name: event_2
+  role: content
+  x: 33
+  y: 1292
+  width: 574
+  height: 146
+  background_color: '#60c0d0'
+- id: 3
+  name: event_3
+  role: date
+  x: 33
+  y: 1477
+  width: 574
+  height: 142
+  background_color: '#60c0d0'
+- id: 4
+  name: event_4
+  role: place
+  x: 33
+  y: 1658
+  width: 574
+  height: 141
+  background_color: '#60c0d0'
+- id: 5
+  name: qr_code
+  role: qr_code
+  x: 1242
+  y: 1678
+  width: 265
+  height: 266
+  background_color: '#f07020'
+- id: 6
+  name: url
+  role: url
+  x: 748
+  y: 1821
+  width: 462
+  height: 95
+  background_color: '#f07020'

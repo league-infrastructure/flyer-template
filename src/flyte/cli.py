@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 from pathlib import Path
 
@@ -14,19 +15,103 @@ def cmd_import(args: argparse.Namespace) -> None:
     src = Path(args.source)
     out_dir = Path(args.output) if args.output else None
     app = Flyte(data_dir=Path.cwd())
-    result = app.import_template(
-        src,
-        output_dir=out_dir,
-        placeholder_color=args.color,
-        tolerance=args.tolerance,
-        edge_dilation=args.dilate,
-        background_sample_offset=args.offset,
-        label_font=args.label_font,
-        replace=args.replace,
-    )
-    print(str(result["template"]))
-    print(str(result["reference"]))
-    print(str(result["regions"]))
+    
+    # Check if source is a directory
+    if src.is_dir():
+        # Import all image files in the directory
+        image_extensions = {'.png', '.jpg', '.jpeg', '.gif', '.bmp', '.tiff', '.webp'}
+        image_files = []
+        
+        # Recursively find all image files
+        for ext in image_extensions:
+            image_files.extend(src.rglob(f'*{ext}'))
+            image_files.extend(src.rglob(f'*{ext.upper()}'))
+        
+        if not image_files:
+            print(f"No image files found in {src}", file=sys.stderr)
+            sys.exit(1)
+        
+        print(f"Found {len(image_files)} image file(s) to import:")
+        for img_file in sorted(image_files):
+            relative_path = img_file.relative_to(src)
+            print(f"  {relative_path}")
+        print()
+        
+        # Track all imported templates for index
+        templates_index = []
+        
+        # Import each file
+        for img_file in sorted(image_files):
+            # Calculate relative path from source directory
+            relative_path = img_file.relative_to(src)
+            
+            # Determine output directory preserving structure
+            if out_dir:
+                # Use the relative directory structure in output
+                file_output_dir = out_dir / relative_path.parent
+            else:
+                # Use source file's parent directory (default behavior)
+                file_output_dir = img_file.parent
+            
+            print(f"Importing: {relative_path}")
+            result = app.import_template(
+                img_file,
+                output_dir=file_output_dir,
+                placeholder_color=args.color,
+                tolerance=args.tolerance,
+                edge_dilation=args.dilate,
+                background_sample_offset=args.offset,
+                label_font=args.label_font,
+                replace=args.replace,
+            )
+            print(f"  → {result['template']}")
+            print(f"  → {result['reference']}")
+            print(f"  → {result['regions']}")
+            print()
+            
+            # Add to index: determine the template directory path relative to output
+            template_dir = Path(result['regions']).parent
+            if out_dir:
+                # Resolve both to absolute paths before computing relative path
+                relative_template_path = template_dir.resolve().relative_to(out_dir.resolve())
+            else:
+                # When no output dir specified, templates are created alongside source files
+                # Use the path relative to the source directory itself
+                relative_template_path = template_dir.resolve().relative_to(src.resolve())
+            
+            templates_index.append(str(relative_template_path))
+        
+        # Write index.json in the output directory
+        if out_dir:
+            index_path = out_dir / "index.json"
+        else:
+            # When no output dir, write index to source directory
+            index_path = src / "index.json"
+        
+        index_data = {
+            "templates": templates_index,
+            "count": len(templates_index)
+        }
+        
+        with index_path.open('w', encoding='utf-8') as f:
+            json.dump(index_data, f, indent=2)
+        
+        print(f"Created index: {index_path}")
+    else:
+        # Single file import (original behavior)
+        result = app.import_template(
+            src,
+            output_dir=out_dir,
+            placeholder_color=args.color,
+            tolerance=args.tolerance,
+            edge_dilation=args.dilate,
+            background_sample_offset=args.offset,
+            label_font=args.label_font,
+            replace=args.replace,
+        )
+        print(str(result["template"]))
+        print(str(result["reference"]))
+        print(str(result["regions"]))
 
 
 def cmd_compile(args: argparse.Namespace) -> None:

@@ -1,0 +1,53 @@
+content_color: '#6fe600'
+width: 1080
+height: 1350
+css: []
+regions:
+- id: 1
+  name: primary_content
+  role: content
+  x: 102
+  y: 310
+  width: 448
+  height: 432
+  background_color: '#e8f8f8'
+- id: 2
+  name: time
+  role: time
+  x: 606
+  y: 692
+  width: 323
+  height: 57
+  background_color: '#e8f8f8'
+- id: 3
+  name: date
+  role: date
+  x: 608
+  y: 766
+  width: 323
+  height: 57
+  background_color: '#e8f8f8'
+- id: 4
+  name: place
+  role: place
+  x: 606
+  y: 840
+  width: 323
+  height: 57
+  background_color: '#e8f8f8'
+- id: 5
+  name: qr_code
+  role: qr_code
+  x: 606
+  y: 1062
+  width: 191
+  height: 190
+  background_color: '#60c0d0'
+- id: 6
+  name: url
+  role: url
+  x: 608
+  y: 1268
+  width: 340
+  height: 57
+  background_color: '#60c0d0'

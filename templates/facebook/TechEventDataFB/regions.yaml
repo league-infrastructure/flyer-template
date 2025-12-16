@@ -1,0 +1,53 @@
+content_color: '#6fe600'
+width: 1200
+height: 630
+css: []
+regions:
+- id: 1
+  name: title
+  role: content
+  x: 197
+  y: 120
+  width: 807
+  height: 41
+  background_color: '#60c0d0'
+- id: 2
+  name: slogan
+  role: time
+  x: 373
+  y: 232
+  width: 455
+  height: 41
+  background_color: '#60c0d0'
+- id: 3
+  name: time
+  role: date
+  x: 381
+  y: 329
+  width: 455
+  height: 42
+  background_color: '#e8f8f8'
+- id: 4
+  name: date
+  role: place
+  x: 381
+  y: 386
+  width: 455
+  height: 41
+  background_color: '#e8f8f8'
+- id: 5
+  name: place
+  role: content2
+  x: 395
+  y: 442
+  width: 420
+  height: 42
+  background_color: '#e8f8f8'
+- id: 6
+  name: url
+  role: url
+  x: 399
+  y: 587
+  width: 419
+  height: 38
+  background_color: '#000000'
