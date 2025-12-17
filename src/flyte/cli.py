@@ -21,7 +21,7 @@ def cmd_import(args: argparse.Namespace) -> None:
     # Check if source is a directory
     if src.is_dir():
         # Import all image files in the directory
-        image_extensions = {'.png', '.jpg', '.jpeg', '.gif', '.bmp', '.tiff', '.webp'}
+        image_extensions = {'.png', '.jpg', '.jpeg', '.gif', '.bmp', '.tiff', '.webp', '.pdf'}
         image_files = []
         
         # Recursively find all image files

@@ -9,6 +9,11 @@ import numpy as np
 import pytesseract
 import yaml
 from PIL import Image, ImageDraw, ImageFont
+import pypdfium2 as pdfium
+try:
+    import fitz  # PyMuPDF
+except Exception:
+    fitz = None
 
 
 @dataclass(frozen=True)
@@ -34,9 +39,26 @@ def analyze_template(
     label_font_path: str | None = None,
     replace: bool = False,
 ) -> dict[str, Any]:
-    img_bgr = cv2.imread(str(source_image), cv2.IMREAD_COLOR)
-    if img_bgr is None:
-        raise ValueError(f"Failed to load image: {source_image}")
+    # Determine input type and load/render to image
+    img_bgr: np.ndarray
+    src_suffix = source_image.suffix.lower()
+    if src_suffix == ".pdf":
+        # Render first page to PNG at 600 DPI using pypdfium2
+        pdf = pdfium.PdfDocument(str(source_image))
+        if len(pdf) == 0:
+            raise ValueError(f"PDF has no pages: {source_image}")
+        page = pdf[0]
+        scale = 600 / 72.0  # 600 DPI
+        bitmap = page.render(scale=scale, fill_color=(255, 255, 255, 255))
+        pil = bitmap.to_pil()
+        pdf.close()
+        img_bgr = cv2.cvtColor(np.array(pil.convert("RGB")), cv2.COLOR_RGB2BGR)
+        source_is_pdf = True
+    else:
+        img_bgr = cv2.imread(str(source_image), cv2.IMREAD_COLOR)
+        if img_bgr is None:
+            raise ValueError(f"Failed to load image: {source_image}")
+        source_is_pdf = False
 
     # Create directory with base name of source file
     base = source_image.stem
@@ -140,6 +162,30 @@ def analyze_template(
     # Get template dimensions
     template_height, template_width = img_bgr.shape[:2]
 
+    # Optionally extract font info per region for PDF inputs
+    pdf_fonts: dict[int, tuple[str, float]] = {}
+    if source_is_pdf and fitz is not None:
+        try:
+            pdf_fonts = _extract_pdf_region_fonts(source_image, regions, scale=600 / 72.0)
+            if not pdf_fonts:
+                print("Info: PDF font extraction returned no fonts; checking alternate parser...")
+        except Exception as e:
+            print(f"Warning: Could not extract PDF fonts: {e}")
+        # Final fallback: use embedded font names (if any) and estimate size from region height
+        if not pdf_fonts:
+            embedded = _extract_embedded_fonts(source_image)
+            if embedded:
+                chosen = embedded[0]
+            else:
+                chosen = "Helvetica"
+            # Estimate font size in points from region height (single-line approximation)
+            # size_pt ≈ 0.5 * height_px * 72 / 600, clamped to [8, 72]
+            est: dict[int, tuple[str, float]] = {}
+            for r in regions:
+                sz_pt = max(8.0, min(72.0, (r.height * 0.5) * (72.0 / 600.0)))
+                est[r.id] = (normalize_font_name(chosen), float(round(sz_pt, 1)))
+            pdf_fonts = est
+
     # Build regions data without template/reference fields
     data: dict[str, Any] = {
         "content_color": placeholder_color.lower(),
@@ -156,6 +202,7 @@ def analyze_template(
                 "width": r.width,
                 "height": r.height,
                 "background_color": r.background_color,
+                **({"font": pdf_fonts.get(r.id, ("", 0.0))[0], "font_size": pdf_fonts.get(r.id, ("", 0.0))[1]} if r.id in pdf_fonts else {}),
             }
             for r in regions
         ],
@@ -526,6 +573,169 @@ def _find_font_path() -> str | None:
         if p.exists():
             return str(p)
     return None
+
+
+def normalize_font_name(name: str) -> str:
+    """Normalize PDF font names for readability.
+    - Removes subset prefixes like "ABCDE+FontName".
+    - Trims whitespace.
+    Leaves style suffixes (e.g., -Bold) intact.
+    """
+    s = (name or "").strip()
+    if "+" in s:
+        # Drop subset prefix before '+'
+        s = s.split("+", 1)[1]
+    return s
+
+
+def _extract_pdf_region_fonts(pdf_path: Path, regions: list[Region], *, scale: float) -> dict[int, tuple[str, float]]:
+    """Extract dominant font and average size for each region from a PDF.
+    Uses PyMuPDF rawdict to get per-span bounding boxes and font info.
+    Returns mapping: region_id -> (font_name, font_size_points).
+    """
+    if fitz is None:
+        return {}
+    doc = fitz.open(str(pdf_path))
+    try:
+        page = doc[0]
+        text = page.get_text("rawdict")
+        if not text or not text.get("blocks"):
+            # Fallback to dict format if rawdict is empty
+            text = page.get_text("dict")
+        # Prepare region rectangles in PDF point space (72 DPI, top-left origin)
+        # Current regions are based on 600 DPI pixels (top-left origin), so convert back to points and add a margin.
+        px_to_pt = 72.0 / 600.0
+        margin_px = 8
+        reg_rects = {
+            r.id: (
+                (r.x - margin_px) * px_to_pt,
+                (r.y - margin_px) * px_to_pt,
+                (r.x + r.width + margin_px) * px_to_pt,
+                (r.y + r.height + margin_px) * px_to_pt,
+            )
+            for r in regions
+        }
+        # Page height in points is needed if spans use bottom-left origin
+        page_height_pt = float(page.rect.height)
+        counts: dict[int, dict[tuple[str, float], int]] = {r.id: {} for r in regions}
+        all_spans: list[tuple[float, float, float, float, str, float, int]] = []
+        for block in text.get("blocks", []) or []:
+            for line in block.get("lines", []) or []:
+                for span in line.get("spans", []) or []:
+                    font = span.get("font") or ""
+                    size = float(span.get("size") or 0.0)
+                    bbox = span.get("bbox") or getattr(line, "bbox", None)
+                    if not bbox:
+                        continue
+                    # bbox may be a list or fitz.Rect
+                    if isinstance(bbox, (list, tuple)):
+                        x0, y0, x1, y1 = bbox
+                    else:
+                        x0, y0, x1, y1 = bbox.x0, bbox.y0, bbox.x1, bbox.y1
+                    # Normalize to top-left origin: flip Y using page height
+                    sy0_top = page_height_pt - y1
+                    sy1_top = page_height_pt - y0
+                    sx0, sy0, sx1, sy1 = x0, sy0_top, x1, sy1_top
+                    chars = span.get("text") or ""
+                    char_count = len(chars)
+                    if char_count == 0:
+                        continue
+                    # Save for fallback proximity vote
+                    all_spans.append((sx0, sy0, sx1, sy1, font, size, char_count))
+                    # Primary: intersection-based counting
+                    for rid, (rx0, ry0, rx1, ry1) in reg_rects.items():
+                        if sx1 <= rx0 or sx0 >= rx1 or sy1 <= ry0 or sy0 >= ry1:
+                            continue
+                        key = (font, size)
+                        d = counts[rid]
+                        d[key] = d.get(key, 0) + char_count
+        result: dict[int, tuple[str, float]] = {}
+        for rid, font_map in counts.items():
+            if not font_map:
+                # Proximity-based fallback when no direct spans intersect the region
+                rx0, ry0, rx1, ry1 = reg_rects[rid]
+                rcx = (rx0 + rx1) * 0.5
+                rcy = (ry0 + ry1) * 0.5
+                page_diag = (page.rect.width ** 2 + page.rect.height ** 2) ** 0.5
+                radius = max(36.0, page_diag * 0.10)
+                font_weights: dict[str, float] = {}
+                size_accum: dict[str, tuple[float, float]] = {}
+                for sx0, sy0, sx1, sy1, fnt, sz, cc in all_spans:
+                    scx = (sx0 + sx1) * 0.5
+                    scy = (sy0 + sy1) * 0.5
+                    dx = scx - rcx
+                    dy = scy - rcy
+                    dist = (dx * dx + dy * dy) ** 0.5
+                    if dist > radius:
+                        continue
+                    weight = cc / (1.0 + dist)
+                    font_weights[fnt] = font_weights.get(fnt, 0.0) + weight
+                    if sz > 0:
+                        ws, ww = size_accum.get(fnt, (0.0, 0.0))
+                        size_accum[fnt] = (ws + sz * weight, ww + weight)
+                if font_weights:
+                    top_font = max(font_weights.items(), key=lambda kv: kv[1])[0]
+                    ws, ww = size_accum.get(top_font, (0.0, 0.0))
+                    size = ws / ww if ww > 0 else 0.0
+                    result[rid] = (normalize_font_name(top_font), size)
+                    continue
+                else:
+                    # No nearby spans found either; leave empty and move on
+                    continue
+            # Pick dominant font by char count
+            (font, size), total = max(font_map.items(), key=lambda kv: kv[1])
+            result[rid] = (normalize_font_name(font), size)
+        # If still missing, assign the page-dominant font as a final fallback
+        if len(result) < len(regions) and all_spans:
+            from collections import defaultdict
+            page_font_counts: dict[str, int] = defaultdict(int)
+            page_font_sizes: dict[str, tuple[float, int]] = defaultdict(lambda: (0.0, 0))
+            for sx0, sy0, sx1, sy1, fnt, sz, cc in all_spans:
+                page_font_counts[fnt] += cc
+                if sz > 0:
+                    ssum, scount = page_font_sizes[fnt]
+                    page_font_sizes[fnt] = (ssum + sz * cc, scount + cc)
+            if page_font_counts:
+                top_font = max(page_font_counts.items(), key=lambda kv: kv[1])[0]
+                ssum, scount = page_font_sizes.get(top_font, (0.0, 0))
+                page_avg_size = (ssum / scount) if scount > 0 else 0.0
+                for r in regions:
+                    if r.id not in result:
+                        result[r.id] = (normalize_font_name(top_font), page_avg_size)
+        return result
+    finally:
+        doc.close()
+
+
+def _extract_embedded_fonts(pdf_path: Path) -> list[str]:
+    """Extract embedded font names from a PDF by scanning FontDescriptor objects.
+    Returns a list of normalized font names (subset prefixes removed)."""
+    if fitz is None:
+        return []
+    doc = fitz.open(str(pdf_path))
+    names: list[str] = []
+    try:
+        import re
+        for xref in range(1, doc.xref_length()):
+            try:
+                obj = doc.xref_object(xref) or ""
+            except Exception:
+                continue
+            if "/Type /FontDescriptor" not in obj:
+                continue
+            m = re.search(r"/FontName\s*/(?:[A-Z]+\+)?([^\s/\]]+)", obj)
+            if m:
+                names.append(normalize_font_name(m.group(1)))
+    finally:
+        doc.close()
+    # Deduplicate preserving order
+    seen = set()
+    out: list[str] = []
+    for n in names:
+        if n not in seen:
+            seen.add(n)
+            out.append(n)
+    return out
 
 
 def _create_template_index_html(template_dir: Path, template_name: str) -> None:
