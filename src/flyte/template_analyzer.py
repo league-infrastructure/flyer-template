@@ -493,7 +493,8 @@ def _make_reference_image(
     img = Image.fromarray(rgb)
     draw = ImageDraw.Draw(img)
 
-    font_path = "/System/Library/Fonts/Helvetica.ttc"
+    # Use provided font or find a suitable system font
+    font_path = label_font_path or _find_font_path()
     for r in regions:
         # Create label with both ID and name
         if r.text:
