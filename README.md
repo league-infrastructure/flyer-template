@@ -25,7 +25,7 @@ To make a template, you will typically modify a Canva design:
 
 
 You should chose from web fonts avaialable on Google. The template site has 
-[a list of recommended fonts with samples](https://flyers.jointheleague.org/fontshtml)
+[a list of recommended fonts with samples](https://flyers.jointheleague.org/fonts.html)
 
 ## Uploading 
 
