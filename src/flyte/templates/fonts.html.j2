@@ -9,23 +9,125 @@
     * { box-sizing: border-box; }
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-      line-height: 1.6; color: #333; background: #fafafa; padding: 2rem 1rem;
+      line-height: 1.6; color: #333; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 3rem 1rem;
+      min-height: 100vh;
     }
-    .container { max-width: 1100px; margin: 0 auto; background: white; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); padding: 2rem; }
-    h1 { color: #222; margin-bottom: .25rem; }
-    .subtitle { color: #666; margin-bottom: 1.25rem; }
-    .topbar { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; }
-    .nav { display: flex; gap: 1rem; }
-    .nav a { color: #667eea; text-decoration: none; }
-    h2 { margin-top: 2rem; color: #444; border-bottom: 1px solid #eee; padding-bottom: .25rem; }
-    .section { margin-top: .75rem; }
-    .font-row { display: grid; grid-template-columns: 260px 1fr; gap: 1rem; padding: .75rem 0; border-bottom: 1px dashed #eee; }
-    .font-name { font-weight: 600; color: #444; word-break: break-word; }
-    .font-sample { font-size: 1.1rem; color: #222; }
-    .replacements { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; margin-top: .75rem; }
-    .repl-block { border: 1px solid #eee; border-radius: 8px; padding: .75rem; background: #fcfcff; }
-    .repl-title { font-weight: 600; margin-bottom: .5rem; }
-    .repl-list { margin: 0; padding-left: 1.25rem; }
+    .container { 
+      max-width: 1400px; 
+      margin: 0 auto; 
+      background: white; 
+      border-radius: 16px; 
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3); 
+      padding: 3rem; 
+    }
+    h1 { 
+      color: #222; 
+      margin-bottom: .5rem; 
+      font-size: 2.5rem; 
+      font-weight: 700;
+    }
+    .subtitle { 
+      color: #666; 
+      margin-bottom: 2rem; 
+      font-size: 1.1rem;
+    }
+    .topbar { 
+      display: flex; 
+      align-items: baseline; 
+      justify-content: space-between; 
+      gap: 1rem; 
+      margin-bottom: 1rem;
+      padding-bottom: 1rem;
+      border-bottom: 2px solid #f0f0f0;
+    }
+    .nav { display: flex; gap: 1.5rem; }
+    .nav a { 
+      color: #667eea; 
+      text-decoration: none; 
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+    .nav a:hover { color: #764ba2; }
+    h2 { 
+      margin-top: 3rem; 
+      margin-bottom: 1.5rem;
+      color: #333; 
+      font-size: 1.75rem;
+      font-weight: 600;
+      border-bottom: 2px solid #667eea; 
+      padding-bottom: .5rem; 
+    }
+    .section { 
+      margin-top: 1rem; 
+      display: grid;
+      gap: 1.5rem;
+    }
+    .font-row { 
+      background: #fafafa;
+      border-radius: 12px;
+      padding: 1.5rem;
+      transition: transform 0.2s, box-shadow 0.2s;
+      border: 1px solid #eee;
+    }
+    .font-row:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      border-color: #667eea;
+    }
+    .font-name { 
+      font-weight: 600; 
+      color: #667eea; 
+      margin-bottom: 0.75rem;
+      font-size: 1rem;
+      letter-spacing: 0.5px;
+    }
+    .font-sample { 
+      font-size: 2rem; 
+      color: #222; 
+      line-height: 1.4;
+      word-wrap: break-word;
+    }
+    .font-sizes {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px dashed #ddd;
+    }
+    .size-demo {
+      color: #555;
+    }
+    .replacements { 
+      display: grid; 
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); 
+      gap: 1.5rem; 
+      margin-top: 1.5rem; 
+    }
+    .repl-block { 
+      border: 2px solid #eee; 
+      border-radius: 12px; 
+      padding: 1.25rem; 
+      background: linear-gradient(to bottom, #fcfcff, #fafafa);
+      transition: border-color 0.2s;
+    }
+    .repl-block:hover {
+      border-color: #667eea;
+    }
+    .repl-title { 
+      font-weight: 600; 
+      margin-bottom: .75rem;
+      color: #333;
+      font-size: 1.05rem;
+    }
+    .repl-list { 
+      margin: 0; 
+      padding-left: 1.5rem;
+      color: #666;
+    }
+    .repl-list li {
+      margin: 0.25rem 0;
+    }
   </style>
 </head>
 <body>
@@ -44,6 +146,14 @@
         <div class="font-name">{{ family }}</div>
         <div class="font-sample" style="font-family: '{{ family }}', system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;">
           {{ sample }}
+        </div>
+        <div class="font-sizes">
+          <div class="size-demo" style="font-family: '{{ family }}', system-ui, -apple-system, sans-serif; font-size: 1.25rem;">
+            Medium: The quick brown fox jumps over the lazy dog
+          </div>
+          <div class="size-demo" style="font-family: '{{ family }}', system-ui, -apple-system, sans-serif; font-size: 0.95rem;">
+            Small: ABCDEFGHIJKLMNOPQRSTUVWXYZ 0123456789
+          </div>
         </div>
       </div>
     {%- endmacro %}

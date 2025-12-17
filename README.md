@@ -1,6 +1,6 @@
 # flyer-template
 
-This flyer tempaltes system creates a web-directory of templates for social media
+This flyer templates system creates a web-directory of templates for social media
 and print marketing that can be used to insert content into images created in
 Canva. Designers create images that have green content boxes, and the `flyte`
 program will extract information about the regions and remove the green boxes,
@@ -17,22 +17,15 @@ Templates look like this:
 
 <img src="https://flyers.jointheleague.org/calendar/EventsScience/src.png" alt="Template preview" style="max-width: 300px;" />
 
-To make a template, you take a design and 
+To make a template, you will typically modify a Canva design:
 
 1. Replace content areas with a green box (#6fe600)
 2. Label the box with the name of the region
 3. Set the font of the label to the font you want the content to have. 
 
 
-You should chose from web fonts avaialable on Google. Here are some safe sans fonts: 
-
-- Poppins
-- Montserrat
-- Roboto
-- Arimo
-- DMSans
-- LeagueSpartan
-- RobotoCondensed
+You should chose from web fonts avaialable on Google. The template site has 
+[a list of recommended fonts with samples](https://flyers.jointheleague.org/fontshtml)
 
 ## Uploading 
 
