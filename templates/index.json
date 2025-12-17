@@ -1,13 +1,12 @@
 {
   "templates": [
     "calendar/EventsScience",
-    "calendar/ProgrammingMeritBadge1",
-    "calendar/ProgrammingMeritBadge2",
+    "calendar/ProgrammingMeritBadge",
     "facebook/TechEventDataFB",
     "flyers/TechEvent",
     "flyers/TechEventOsvaldoQR"
   ],
-  "count": 6,
+  "count": 5,
   "repo_url": "https://github.com/league-infrastructure/flyer-template",
   "source_path": "source"
 }
