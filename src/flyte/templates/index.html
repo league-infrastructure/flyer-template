@@ -22,6 +22,7 @@
       box-shadow: 0 20px 60px rgba(0,0,0,0.3);
       padding: 2rem;
     }
+    .topbar { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; }
     h1 {
       color: #667eea;
       margin-bottom: 0.5rem;
@@ -32,6 +33,8 @@
       margin-bottom: 2rem;
       font-size: 1.1rem;
     }
+    .nav { display: flex; gap: 1rem; }
+    .nav a { color: #667eea; text-decoration: none; font-weight: 500; }
     .stats {
       display: flex;
       gap: 2rem;
@@ -40,6 +43,8 @@
       background: #f8f9fa;
       border-radius: 8px;
     }
+    .top-links { margin-top: 0.25rem; margin-bottom: 1rem; }
+    .top-links a { color: #667eea; text-decoration: none; }
     .stat {
       display: flex;
       align-items: center;
@@ -185,8 +190,19 @@
 </head>
 <body>
   <div class="container">
-    <h1>📄 Flyer Templates</h1>
-    <p class="subtitle">Browse and download template assets</p>
+    <div class="topbar">
+      <div>
+        <h1>📄 Flyer Templates</h1>
+        <p class="subtitle">Browse and download template assets</p>
+      </div>
+      <nav class="nav">
+        <a href="fonts.html">Fonts</a>
+        <a href="https://github.com/league-infrastructure/flyer-template/blob/master/README.md" target="_blank" rel="noopener noreferrer">README</a>
+      </nav>
+    </div>
+    <p class="top-links">
+      <a href="https://github.com/league-infrastructure/flyer-template/blob/master/README.md" target="_blank" rel="noopener noreferrer">Project README</a>
+    </p>
     
     <div class="stats" id="stats">
       <div class="stat">

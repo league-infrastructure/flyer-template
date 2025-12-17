@@ -41,6 +41,13 @@ try:
 except Exception:
     HAS_PDFMINER = False
 
+# YAML output support (PyYAML is part of project dependencies)
+try:
+    import yaml  # type: ignore
+    HAS_YAML = True
+except Exception:
+    HAS_YAML = False
+
 
 @dataclass
 class FontUse:
@@ -131,6 +138,12 @@ def main(argv: Optional[List[str]] = None) -> int:
     parser.add_argument("--json", action="store_true", help="Output JSON instead of text")
     parser.add_argument("--prefer-mupdf", action="store_true", help="Prefer PyMuPDF if available")
     parser.add_argument("--normalize", action="store_true", help="Normalize font names (strip subset prefixes)")
+    parser.add_argument(
+        "--yaml-out",
+        type=str,
+        default=None,
+        help="Path to write YAML list of unique fonts (e.g., test/fonts.yaml)",
+    )
     args = parser.parse_args(argv)
 
     root = Path(args.directory).expanduser().resolve()
@@ -172,6 +185,26 @@ def main(argv: Optional[List[str]] = None) -> int:
         for font, docset in font_docs.items()
     ]
     popularity.sort(key=lambda x: (-x[1], x[0].lower()))
+
+    # Optionally emit YAML file listing all unique fonts (sorted by popularity then name)
+    if args.yaml_out:
+        unique_fonts_sorted = [f for f, _, _ in popularity]
+        out_path = Path(args.yaml_out)
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        # Compose a simple YAML structure with directory context and fonts
+        yaml_payload = {
+            "directory": str(root),
+            "documents": total_docs,
+            "fonts": unique_fonts_sorted,
+        }
+        if HAS_YAML:
+            with out_path.open("w", encoding="utf-8") as fh:
+                yaml.safe_dump(yaml_payload, fh, sort_keys=False, allow_unicode=True)
+        else:
+            # Fallback: write a minimal YAML by hand if PyYAML isn't available
+            # Note: JSON is valid YAML, so this remains parseable by YAML parsers.
+            with out_path.open("w", encoding="utf-8") as fh:
+                fh.write(json.dumps(yaml_payload, ensure_ascii=False, indent=2))
 
     # Output
     if args.json:

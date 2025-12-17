@@ -1,6 +1,6 @@
 # flyer-template
 
-This flyer tempaltes system create a web-directory of templates for social media
+This flyer tempaltes system creates a web-directory of templates for social media
 and print marketing that can be used to insert content into images created in
 Canva. Designers create images that have green content boxes, and the `flyte`
 program will extract information about the regions and remove the green boxes,
@@ -10,6 +10,40 @@ You can load the images into the `source` directory in this repo, rin the `flyte
 import` programs, and commit the repo, but the repo also has a github workflow
 that will aloow you to just put the image into the `source` directory via Github
 and commit it. 
+
+# Template Structure
+
+Templates look like this: 
+
+<img src="https://flyers.jointheleague.org/calendar/EventsScience/src.png" alt="Template preview" style="max-width: 300px;" />
+
+To make a template, you take a design and 
+
+1. Replace content areas with a green box (#6fe600)
+2. Label the box with the name of the region
+3. Set the font of the label to the font you want the content to have. 
+
+
+You should chose from web fonts avaialable on Google. Here are some safe sans fonts: 
+
+- Poppins
+- Montserrat
+- Roboto
+- Arimo
+- DMSans
+- LeagueSpartan
+- RobotoCondensed
+
+## Uploading 
+
+Go to [https://flyers.jointheleague.org](https://flyers.jointheleague.org/) and
+navigate to the directory where you want to store the template. Then click on
+the "Add Source" button at the top of the page. This will take you to the Github
+repo where you can add the file. You shoudl be in the `/source/` directory
+
+From Canva, download a PDF of you design and store it in the `/source/`
+directory. In 3 - 5 minutes, the template should appear on the website.  Note
+that you will probably have to hard-reload the page to see it. 
 
 
 ## Flyte program

@@ -1,0 +1,43 @@
+sans_serif:
+  - Poppins
+  - Montserrat
+  - Roboto
+  - Arimo
+  - DM Sans
+  - Inter
+
+condensed:
+  - League Spartan
+  - Roboto Condensed
+  - Bebas Neue
+
+display:
+  - Bangers
+  - Orbitron
+
+serif:
+  - Lora
+  - Merriweather
+  - Playfair Display
+  - EB Garamond
+  - Libre Baskerville
+  - Source Serif 4
+
+slab_serif:
+  - Roboto Slab
+  - Zilla Slab
+
+monospace:
+  - Fira Code
+
+handwritten:
+  - Patrick Hand
+  - Caveat
+
+novelty:
+  - Fredoka One
+  - Press Start 2P
+  - Comic Neue
+  - Lilita One
+  - Luckiest Guy
+  - Sniglet

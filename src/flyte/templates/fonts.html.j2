@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fonts Preview</title>
+  {{ font_links | safe }}
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.6; color: #333; background: #fafafa; padding: 2rem 1rem;
+    }
+    .container { max-width: 1100px; margin: 0 auto; background: white; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); padding: 2rem; }
+    h1 { color: #222; margin-bottom: .25rem; }
+    .subtitle { color: #666; margin-bottom: 1.25rem; }
+    .topbar { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; }
+    .nav { display: flex; gap: 1rem; }
+    .nav a { color: #667eea; text-decoration: none; }
+    h2 { margin-top: 2rem; color: #444; border-bottom: 1px solid #eee; padding-bottom: .25rem; }
+    .section { margin-top: .75rem; }
+    .font-row { display: grid; grid-template-columns: 260px 1fr; gap: 1rem; padding: .75rem 0; border-bottom: 1px dashed #eee; }
+    .font-name { font-weight: 600; color: #444; word-break: break-word; }
+    .font-sample { font-size: 1.1rem; color: #222; }
+    .replacements { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; margin-top: .75rem; }
+    .repl-block { border: 1px solid #eee; border-radius: 8px; padding: .75rem; background: #fcfcff; }
+    .repl-title { font-weight: 600; margin-bottom: .5rem; }
+    .repl-list { margin: 0; padding-left: 1.25rem; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="topbar">
+      <h1>Fonts Preview</h1>
+      <nav class="nav">
+        <a href="index.html">Gallery</a>
+        <a href="https://github.com/league-infrastructure/flyer-template/blob/master/README.md" target="_blank" rel="noopener noreferrer">README</a>
+      </nav>
+    </div>
+    <p class="subtitle">Example lines rendered with declared font-family names from docs/fonts.yaml.</p>
+
+    {% macro font_row(family, sample) -%}
+      <div class="font-row">
+        <div class="font-name">{{ family }}</div>
+        <div class="font-sample" style="font-family: '{{ family }}', system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;">
+          {{ sample }}
+        </div>
+      </div>
+    {%- endmacro %}
+
+    {% macro section(title, families, sample) -%}
+      {% if families and families|length > 0 %}
+        <h2>{{ title }}</h2>
+        <div class="section">
+          {% for f in families %}
+            {{ font_row(f, sample) }}
+          {% endfor %}
+        </div>
+      {% endif %}
+    {%- endmacro %}
+
+    {{ section('Main (Google Fonts)', main, sample_text) }}
+    {{ section('Main (Non-Google)', main_nogoogle, sample_text) }}
+
+    {% if replacements %}
+      <h2>Replacements</h2>
+      <div class="replacements">
+        {% for k, lst in replacements.items() %}
+          {% if lst and lst|length > 0 %}
+            <div class="repl-block">
+              <div class="repl-title">{{ k }} → {{ lst[0] }}</div>
+              {% if lst|length > 1 %}
+                <ul class="repl-list">
+                  {% for alt in lst[1:] %}
+                    <li>{{ alt }}</li>
+                  {% endfor %}
+                </ul>
+              {% endif %}
+            </div>
+          {% endif %}
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    {{ section('Other', other, sample_text) }}
+
+    {% for title, families in category_sections %}
+      {{ section(title, families, sample_text) }}
+    {% endfor %}
+  </div>
+</body>
+</html>

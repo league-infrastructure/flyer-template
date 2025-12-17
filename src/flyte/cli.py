@@ -7,6 +7,12 @@ import sys
 from pathlib import Path
 
 from flyte.flyte import Flyte
+import textwrap
+from jinja2 import Environment, FileSystemLoader, select_autoescape
+try:
+    import yaml  # type: ignore
+except Exception:  # pragma: no cover
+    yaml = None
 
 __version__ = "0.1.1"
 
@@ -119,6 +125,101 @@ def cmd_import(args: argparse.Namespace) -> None:
             print(f"Created gallery: {index_html_dest}")
         else:
             print(f"Warning: Template not found at {index_html_template}", file=sys.stderr)
+
+        # Generate fonts.html from docs/fonts.yaml if available (via Jinja2 template)
+        try:
+            fonts_yaml_path = Path("docs/fonts.yaml")
+            if yaml is None:
+                raise RuntimeError("PyYAML not installed; cannot render fonts.html")
+            if fonts_yaml_path.exists():
+                with fonts_yaml_path.open("r", encoding="utf-8") as f:
+                    fonts_data = yaml.safe_load(f) or {}
+
+                def as_list(value):
+                    return [x for x in (value or []) if isinstance(x, str)]
+
+                main = as_list(fonts_data.get("main"))
+                main_nogoogle = as_list(fonts_data.get("main_nogoogle")) or as_list(fonts_data.get("nogoogle"))
+                other = as_list(fonts_data.get("other"))
+                # If category-based structure (arbitrary keys -> list) is provided, capture it
+                category_sections: list[tuple[str, list[str]]] = []
+                if not (main or main_nogoogle or other):
+                    for k, v in fonts_data.items():
+                        if isinstance(v, list) and all(isinstance(x, str) for x in v):
+                            title = k.replace("_", " ").title()
+                            category_sections.append((title, [str(x) for x in v]))
+
+                # Build Google Fonts links to ensure samples render with intended families
+                fam_set: set[str] = set()
+                for lst in (main, main_nogoogle, other):
+                    for f in lst:
+                        fam_set.add(str(f))
+                for _, lst in category_sections:
+                    for f in lst:
+                        fam_set.add(str(f))
+
+                def enc_family(name: str) -> str:
+                    return name.replace(" ", "+")
+
+                params = [f"family={enc_family(f)}" for f in sorted(fam_set)]
+                # Chunk into multiple <link>s to avoid overly long URLs
+                chunk_size = 12
+                chunks = [params[i:i+chunk_size] for i in range(0, len(params), chunk_size)]
+                links = []
+                if chunks:
+                    links.append('<link rel="preconnect" href="https://fonts.googleapis.com">')
+                    links.append('<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>')
+                    for ch in chunks:
+                        href = "https://fonts.googleapis.com/css2?" + "&".join(ch) + "&display=swap"
+                        links.append(f'<link href="{href}" rel="stylesheet">')
+                font_links = "\n".join(links)
+                replacements = fonts_data.get("replacements") or {}
+
+                # Normalize replacements into mapping -> list[str]
+                norm_repl = {}
+                if isinstance(replacements, dict):
+                    for k, v in replacements.items():
+                        if isinstance(v, dict):
+                            items = []
+                            primary = v.get("primary")
+                            alts = v.get("alternates") or []
+                            if isinstance(primary, str):
+                                items.append(primary)
+                            if isinstance(alts, list):
+                                items.extend([x for x in alts if isinstance(x, str)])
+                            norm_repl[k] = items
+                        elif isinstance(v, list):
+                            norm_repl[k] = [x for x in v if isinstance(x, str)]
+
+                # Render Jinja2 template
+                tpl_dir = Path(__file__).parent / "templates"
+                env = Environment(
+                    loader=FileSystemLoader(str(tpl_dir)),
+                    autoescape=select_autoescape(["html", "xml"]),
+                    trim_blocks=True,
+                    lstrip_blocks=True,
+                )
+                template = env.get_template("fonts.html.j2")
+
+                sample_text = "Sphinx of black quartz, judge my vow — 123 ABC"
+                html = template.render(
+                    font_links=font_links,
+                    main=main,
+                    main_nogoogle=main_nogoogle,
+                    other=other,
+                    replacements=norm_repl,
+                    category_sections=category_sections,
+                    sample_text=sample_text,
+                )
+
+                fonts_html_dest = index_html_dest.parent / "fonts.html"
+                with fonts_html_dest.open("w", encoding="utf-8") as f:
+                    f.write(html)
+                print(f"Created fonts preview: {fonts_html_dest}")
+            else:
+                print("docs/fonts.yaml not found; skipping fonts.html generation")
+        except Exception as e:
+            print(f"Warning: Unable to generate fonts.html: {e}", file=sys.stderr)
     else:
         # Single file import (original behavior)
         result = app.import_template(
