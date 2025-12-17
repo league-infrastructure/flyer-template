@@ -1,53 +1,65 @@
 content_color: '#6fe600'
-width: 1200
-height: 630
+width: 7501
+height: 3938
 css: []
 regions:
 - id: 1
   name: title
   role: content
-  x: 197
-  y: 120
-  width: 807
-  height: 41
+  x: 1226
+  y: 745
+  width: 5054
+  height: 266
   background_color: '#60c0d0'
+  font: Kief-Montaser-Regular
+  font_size: 16.0
 - id: 2
   name: slogan
   role: content2
-  x: 373
-  y: 232
-  width: 455
-  height: 41
+  x: 2327
+  y: 1444
+  width: 2852
+  height: 266
   background_color: '#60c0d0'
+  font: Kief-Montaser-Regular
+  font_size: 16.0
 - id: 3
   name: time
   role: time
-  x: 395
-  y: 329
-  width: 441
-  height: 42
+  x: 2469
+  y: 2054
+  width: 2758
+  height: 266
   background_color: '#e8f8f8'
+  font: Kief-Montaser-Regular
+  font_size: 16.0
 - id: 4
   name: date
   role: date
-  x: 395
-  y: 386
-  width: 441
-  height: 41
+  x: 2469
+  y: 2407
+  width: 2758
+  height: 266
   background_color: '#e8f8f8'
+  font: Kief-Montaser-Regular
+  font_size: 16.0
 - id: 5
   name: place
   role: place
-  x: 395
-  y: 442
-  width: 441
-  height: 42
+  x: 2469
+  y: 2759
+  width: 2758
+  height: 266
   background_color: '#e8f8f8'
+  font: Kief-Montaser-Regular
+  font_size: 16.0
 - id: 6
   name: url
   role: url
-  x: 399
-  y: 587
-  width: 419
-  height: 38
+  x: 2488
+  y: 3670
+  width: 2626
+  height: 242
   background_color: '#000000'
+  font: Kief-Montaser-Regular
+  font_size: 14.5

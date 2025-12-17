@@ -1,53 +1,65 @@
 content_color: '#6fe600'
-width: 1080
-height: 1350
+width: 6751
+height: 8438
 css: []
 regions:
 - id: 1
   name: primary_content
   role: content
-  x: 102
-  y: 310
-  width: 448
-  height: 432
+  x: 632
+  y: 1938
+  width: 2809
+  height: 2704
   background_color: '#e8f8f8'
+  font: DMSans-Bold
+  font_size: 72.0
 - id: 2
   name: time
   role: time
-  x: 606
-  y: 692
-  width: 323
-  height: 57
+  x: 3782
+  y: 4322
+  width: 2025
+  height: 363
   background_color: '#e8f8f8'
+  font: DMSans-Bold
+  font_size: 21.8
 - id: 3
   name: date
   role: date
-  x: 608
-  y: 766
-  width: 323
-  height: 57
+  x: 3796
+  y: 4785
+  width: 2025
+  height: 363
   background_color: '#e8f8f8'
+  font: DMSans-Bold
+  font_size: 21.8
 - id: 4
   name: place
   role: place
-  x: 606
-  y: 840
-  width: 323
-  height: 57
+  x: 3782
+  y: 5247
+  width: 2025
+  height: 363
   background_color: '#e8f8f8'
+  font: DMSans-Bold
+  font_size: 21.8
 - id: 5
   name: qr_code
   role: qr_code
-  x: 606
-  y: 1062
-  width: 191
-  height: 190
+  x: 3782
+  y: 6635
+  width: 1205
+  height: 1196
   background_color: '#60c0d0'
+  font: DMSans-Bold
+  font_size: 71.8
 - id: 6
   name: url
   role: url
-  x: 608
-  y: 1268
-  width: 340
-  height: 57
+  x: 3796
+  y: 7921
+  width: 2130
+  height: 363
   background_color: '#60c0d0'
+  font: DMSans-Bold
+  font_size: 21.8
